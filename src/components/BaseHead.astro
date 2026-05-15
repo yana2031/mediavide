@@ -11,10 +11,24 @@ interface Props {
 	type?: 'website' | 'article';
 	pubDate?: Date;
 	updatedDate?: Date;
+	section?: string;      // カテゴリー名（og:article:section用）
+	noindex?: boolean;
 }
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
-const { title, description, image = FallbackImage, type = 'website', pubDate, updatedDate } = Astro.props;
+const {
+	title,
+	description,
+	image = FallbackImage,
+	type = 'website',
+	pubDate,
+	updatedDate,
+	section,
+	noindex = false,
+} = Astro.props;
+
+const siteUrl = Astro.site?.toString().replace(/\/$/, '') ?? '';
+const ogImageUrl = new URL(image.src, Astro.url).toString();
 
 const jsonLd = type === 'article' ? {
 	'@context': 'https://schema.org',
@@ -23,14 +37,39 @@ const jsonLd = type === 'article' ? {
 	description,
 	datePublished: pubDate?.toISOString(),
 	dateModified: (updatedDate ?? pubDate)?.toISOString(),
-	image: new URL(image.src, Astro.url).toString(),
+	image: {
+		'@type': 'ImageObject',
+		url: ogImageUrl,
+		width: image.width,
+		height: image.height,
+	},
 	url: canonicalURL.toString(),
+	mainEntityOfPage: {
+		'@type': 'WebPage',
+		'@id': canonicalURL.toString(),
+	},
+	inLanguage: 'ja-JP',
+	author: {
+		'@type': 'Organization',
+		name: SITE_TITLE,
+		url: siteUrl,
+	},
 	publisher: {
 		'@type': 'Organization',
 		name: SITE_TITLE,
-		url: Astro.site?.toString(),
+		url: siteUrl,
+		logo: {
+			'@type': 'ImageObject',
+			url: `${siteUrl}/favicon.svg`,
+		},
 	},
-} : null;
+} : {
+	'@context': 'https://schema.org',
+	'@type': 'WebSite',
+	name: SITE_TITLE,
+	url: siteUrl,
+	inLanguage: 'ja-JP',
+};
 ---
 
 <!-- Google Analytics -->
@@ -49,6 +88,8 @@ const jsonLd = type === 'article' ? {
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <meta name="theme-color" content="#1d4ed8" />
+<meta name="robots" content={noindex ? 'noindex,nofollow' : 'index,follow'} />
+<meta name="author" content={SITE_TITLE} />
 <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 <link rel="icon" href="/favicon.ico" />
 <link rel="sitemap" href="/sitemap-index.xml" />
@@ -78,15 +119,30 @@ const jsonLd = type === 'article' ? {
 <meta property="og:url" content={Astro.url} />
 <meta property="og:title" content={title} />
 <meta property="og:description" content={description} />
-<meta property="og:image" content={new URL(image.src, Astro.url)} />
+<meta property="og:image" content={ogImageUrl} />
+<meta property="og:image:width" content={String(image.width)} />
+<meta property="og:image:height" content={String(image.height)} />
+<meta property="og:image:alt" content={title} />
 <meta property="og:site_name" content={SITE_TITLE} />
 
-<!-- Twitter -->
-<meta property="twitter:card" content="summary_large_image" />
-<meta property="twitter:url" content={Astro.url} />
-<meta property="twitter:title" content={title} />
-<meta property="twitter:description" content={description} />
-<meta property="twitter:image" content={new URL(image.src, Astro.url)} />
+<!-- og:article（記事ページのみ） -->
+{type === 'article' && pubDate && (
+	<meta property="article:published_time" content={pubDate.toISOString()} />
+)}
+{type === 'article' && (updatedDate ?? pubDate) && (
+	<meta property="article:modified_time" content={(updatedDate ?? pubDate)!.toISOString()} />
+)}
+{type === 'article' && section && (
+	<meta property="article:section" content={section} />
+)}
+
+<!-- Twitter / X -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:url" content={Astro.url} />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={ogImageUrl} />
+<meta name="twitter:image:alt" content={title} />
 
 <!-- JSON-LD Structured Data -->
-{jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
+<script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />

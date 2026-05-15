@@ -5,17 +5,52 @@ import BaseHead from '../components/BaseHead.astro';
 import Footer from '../components/Footer.astro';
 import FormattedDate from '../components/FormattedDate.astro';
 import Header from '../components/Header.astro';
-import { CATEGORIES } from '../consts';
+import { CATEGORIES, SITE_TITLE } from '../consts';
 
-type Props = CollectionEntry<'blog'>['data'];
+interface HeadingItem {
+	depth: number;
+	slug: string;
+	text: string;
+}
 
-const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
+type Props = CollectionEntry<'blog'>['data'] & {
+	headings?: HeadingItem[];
+	readingTime?: number;
+};
 
-// カテゴリーはfrontmatterから取得、なければURLから補完
-const { category: frontmatterCategory } = Astro.props as any;
-const pathParts = Astro.url.pathname.split('/').filter(Boolean);
-const categorySlug = frontmatterCategory ?? (pathParts.length >= 3 ? pathParts[1] : null);
-const categoryLabel = categorySlug ? CATEGORIES[categorySlug] : null;
+const {
+	title,
+	description,
+	pubDate,
+	updatedDate,
+	heroImage,
+	category,
+	headings = [],
+	readingTime,
+} = Astro.props;
+
+const categoryLabel = category ? CATEGORIES[category] : null;
+const tocHeadings = headings.filter(h => h.depth === 2 || h.depth === 3);
+
+// Breadcrumb JSON-LD
+const siteUrl = Astro.site?.toString().replace(/\/$/, '') ?? '';
+const breadcrumbItems = [
+	{ position: 1, name: 'ホーム', item: `${siteUrl}/` },
+	...(category && categoryLabel
+		? [{ position: 2, name: categoryLabel, item: `${siteUrl}/category/${category}/` }]
+		: []),
+	{ position: category ? 3 : 2, name: title, item: `${siteUrl}${Astro.url.pathname}` },
+];
+const breadcrumbJsonLd = {
+	'@context': 'https://schema.org',
+	'@type': 'BreadcrumbList',
+	itemListElement: breadcrumbItems.map(b => ({
+		'@type': 'ListItem',
+		position: b.position,
+		name: b.name,
+		item: b.item,
+	})),
+};
 ---
 
 <html lang="ja">
@@ -26,84 +61,159 @@ const categoryLabel = categorySlug ? CATEGORIES[categorySlug] : null;
 			type="article"
 			pubDate={pubDate}
 			updatedDate={updatedDate}
+			section={categoryLabel ?? undefined}
 		/>
+		<!-- BreadcrumbList JSON-LD -->
+		<script type="application/ld+json" set:html={JSON.stringify(breadcrumbJsonLd)} />
 	</head>
 
 	<body>
 		<Header />
 		<div class="article-layout">
 			<main>
-				<article>
+				<article
+					itemscope
+					itemtype="https://schema.org/Article"
+				>
 					<!-- Breadcrumb -->
 					<nav class="breadcrumb" aria-label="パンくずリスト">
 						<a href="/">ホーム</a>
-						<span aria-hidden="true">›</span>
-						<a href="/blog/">記事一覧</a>
-						{categoryLabel && categorySlug && (
+						{category && categoryLabel && (
 							<>
 								<span aria-hidden="true">›</span>
-								<a href={`/category/${categorySlug}/`}>{categoryLabel}</a>
+								<a href={`/category/${category}/`}>{categoryLabel}</a>
 							</>
 						)}
 						<span aria-hidden="true">›</span>
-						<span class="current">{title}</span>
+						<span class="current" aria-current="page">{title}</span>
 					</nav>
 
 					<!-- Hero Image -->
 					{heroImage && (
 						<div class="hero-image">
-							<Image width={900} height={450} src={heroImage} alt={title} />
+							<Image
+								width={900}
+								height={450}
+								src={heroImage}
+								alt={title}
+								itemprop="image"
+								loading="eager"
+							/>
 						</div>
 					)}
 
 					<!-- Article Header -->
 					<header class="article-header">
-						{categoryLabel && categorySlug && (
-							<a href={`/category/${categorySlug}/`} class="category-chip">{categoryLabel}</a>
+						{category && categoryLabel && (
+							<a href={`/category/${category}/`} class="category-chip">{categoryLabel}</a>
 						)}
 						<div class="article-meta">
-							<time class="pub-date"><FormattedDate date={pubDate} /></time>
+							<time
+								class="pub-date"
+								itemprop="datePublished"
+								datetime={pubDate.toISOString()}
+							>
+								<FormattedDate date={pubDate} />
+							</time>
 							{updatedDate && (
-								<span class="updated-date">最終更新：<FormattedDate date={updatedDate} /></span>
+								<time
+									class="updated-date"
+									itemprop="dateModified"
+									datetime={updatedDate.toISOString()}
+								>
+									最終更新：<FormattedDate date={updatedDate} />
+								</time>
+							)}
+							{readingTime && (
+								<span class="reading-time">🕐 約{readingTime}分</span>
 							)}
 						</div>
-						<h1>{title}</h1>
-						{description && <p class="article-desc">{description}</p>}
+						<h1 itemprop="headline">{title}</h1>
+						{description && (
+							<p class="article-desc" itemprop="description">{description}</p>
+						)}
 					</header>
+
+					<!-- TOC（モバイル用：本文前） -->
+					{tocHeadings.length >= 3 && (
+						<nav class="toc-mobile" aria-label="目次">
+							<p class="toc-title">📋 目次</p>
+							<ol class="toc-list">
+								{tocHeadings.map(h => (
+									<li class:list={[`toc-item`, `toc-h${h.depth}`]}>
+										<a href={`#${h.slug}`}>{h.text}</a>
+									</li>
+								))}
+							</ol>
+						</nav>
+					)}
 
 					<hr class="divider" />
 
-					<div class="prose">
+					<!-- Article Body -->
+					<div class="prose" itemprop="articleBody">
 						<slot />
 					</div>
 
+					<!-- Article Footer -->
 					<div class="article-footer">
-						{categoryLabel && categorySlug && (
-							<a href={`/category/${categorySlug}/`} class="category-back">
+						{category && categoryLabel && (
+							<a href={`/category/${category}/`} class="footer-link">
 								← {categoryLabel}の記事一覧
 							</a>
 						)}
-						<a href="/blog/" class="back-link">すべての記事一覧 →</a>
+						<a href="/" class="footer-link footer-link-muted">ホームに戻る</a>
 					</div>
+
+					<!-- hidden microdata -->
+					<span itemprop="author" itemscope itemtype="https://schema.org/Organization" hidden>
+						<span itemprop="name">{SITE_TITLE}</span>
+					</span>
+					<span itemprop="publisher" itemscope itemtype="https://schema.org/Organization" hidden>
+						<span itemprop="name">{SITE_TITLE}</span>
+					</span>
 				</article>
 			</main>
 
 			<!-- Sidebar -->
-			<aside class="sidebar">
+			<aside class="sidebar" aria-label="サイドバー">
+				<!-- TOC（デスクトップ用） -->
+				{tocHeadings.length >= 3 && (
+					<div class="sidebar-widget toc-widget">
+						<h2 class="widget-title">📋 目次</h2>
+						<nav aria-label="目次">
+							<ol class="toc-list">
+								{tocHeadings.map(h => (
+									<li class:list={[`toc-item`, `toc-h${h.depth}`]}>
+										<a href={`#${h.slug}`}>{h.text}</a>
+									</li>
+								))}
+							</ol>
+						</nav>
+					</div>
+				)}
+
+				<!-- Category Widget -->
 				<div class="sidebar-widget">
-					<h3 class="widget-title">📂 カテゴリー</h3>
+					<h2 class="widget-title">📂 カテゴリー</h2>
 					<ul class="widget-list">
 						{Object.entries(CATEGORIES).map(([slug, label]) => (
 							<li>
-								<a href={`/category/${slug}/`} class:list={[{ active: slug === categorySlug }]}>
+								<a
+									href={`/category/${slug}/`}
+									class:list={[{ active: slug === category }]}
+									aria-current={slug === category ? 'page' : undefined}
+								>
 									{label}
 								</a>
 							</li>
 						))}
 					</ul>
 				</div>
+
+				<!-- About Widget -->
 				<div class="sidebar-widget">
-					<h3 class="widget-title">📌 サイトについて</h3>
+					<h2 class="widget-title">📌 サイトについて</h2>
 					<p class="widget-text">オンライン資格講座の比較・レビュー情報を発信。社会人の資格取得を応援するメディアです。</p>
 					<a href="/about/" class="widget-link">詳しく見る →</a>
 				</div>
@@ -124,6 +234,7 @@ const categoryLabel = categorySlug ? CATEGORIES[categorySlug] : null;
 		align-items: start;
 	}
 
+	/* Breadcrumb */
 	.breadcrumb {
 		display: flex;
 		align-items: center;
@@ -140,9 +251,10 @@ const categoryLabel = categorySlug ? CATEGORIES[categorySlug] : null;
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
-		max-width: 200px;
+		max-width: 220px;
 	}
 
+	/* Hero */
 	.hero-image {
 		margin-bottom: 1.75rem;
 		border-radius: var(--radius-lg);
@@ -151,8 +263,8 @@ const categoryLabel = categorySlug ? CATEGORIES[categorySlug] : null;
 	}
 	.hero-image :global(img) { width: 100%; height: auto; display: block; border-radius: 0; }
 
+	/* Article Header */
 	.article-header { margin-bottom: 1.5rem; }
-
 	.category-chip {
 		display: inline-block;
 		background: var(--color-primary-light);
@@ -170,12 +282,13 @@ const categoryLabel = categorySlug ? CATEGORIES[categorySlug] : null;
 	.article-meta {
 		display: flex;
 		align-items: center;
-		gap: 1.25rem;
+		gap: 1rem;
 		margin-bottom: 0.9rem;
 		flex-wrap: wrap;
 	}
 	.pub-date { font-size: 0.85rem; color: var(--color-text-muted); font-weight: 500; }
 	.updated-date { font-size: 0.8rem; color: var(--color-text-muted); font-style: italic; }
+	.reading-time { font-size: 0.82rem; color: var(--color-text-muted); }
 
 	.article-header h1 {
 		font-size: clamp(1.4rem, 3.5vw, 2rem);
@@ -191,13 +304,48 @@ const categoryLabel = categorySlug ? CATEGORIES[categorySlug] : null;
 		margin: 0;
 	}
 
+	/* TOC Mobile（本文前、スマホのみ） */
+	.toc-mobile {
+		background: var(--color-primary-light);
+		border: 1px solid #bfdbfe;
+		border-radius: var(--radius-md);
+		padding: 1rem 1.25rem;
+		margin-bottom: 1.5rem;
+		display: none;
+	}
+	.toc-title {
+		font-size: 0.9rem;
+		font-weight: 700;
+		margin: 0 0 0.6rem;
+		color: var(--color-primary);
+	}
+
+	/* TOC共通 */
+	.toc-list {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+		counter-reset: toc-counter;
+	}
+	.toc-item { margin-bottom: 0.3rem; }
+	.toc-item a {
+		font-size: 0.83rem;
+		color: var(--color-text);
+		text-decoration: none;
+		line-height: 1.5;
+		display: block;
+		padding: 0.2em 0;
+		transition: color 0.12s;
+	}
+	.toc-item a:hover { color: var(--color-primary); text-decoration: none; }
+	.toc-h3 { padding-left: 1em; }
+	.toc-h3 a { font-size: 0.8rem; color: var(--color-text-muted); }
+	.toc-h3 a:hover { color: var(--color-primary); }
+
 	.divider { border: none; border-top: 1px solid var(--color-border); margin: 1.75rem 0; }
 
-	.prose {
-		font-size: 1.0625rem;
-		line-height: 1.9;
-		color: var(--color-text);
-	}
+	/* Article Body */
+	.prose { font-size: 1.0625rem; line-height: 1.9; color: var(--color-text); }
 	.prose :global(h2) {
 		font-size: 1.35rem;
 		margin-top: 2.5em;
@@ -214,6 +362,7 @@ const categoryLabel = categorySlug ? CATEGORIES[categorySlug] : null;
 	.prose :global(ul), .prose :global(ol) { padding-left: 1.5em; margin-bottom: 1.5em; }
 	.prose :global(li) { margin-bottom: 0.5em; }
 
+	/* Article Footer */
 	.article-footer {
 		display: flex;
 		align-items: center;
@@ -224,13 +373,14 @@ const categoryLabel = categorySlug ? CATEGORIES[categorySlug] : null;
 		padding-top: 1.5rem;
 		border-top: 1px solid var(--color-border);
 	}
-	.category-back, .back-link {
+	.footer-link {
 		font-size: 0.9rem;
 		font-weight: 600;
 		color: var(--color-primary);
 		text-decoration: none;
 	}
-	.category-back:hover, .back-link:hover { text-decoration: underline; }
+	.footer-link:hover { text-decoration: underline; }
+	.footer-link-muted { color: var(--color-text-muted); font-weight: 400; }
 
 	/* Sidebar */
 	.sidebar { position: sticky; top: 80px; display: flex; flex-direction: column; gap: 1.25rem; }
@@ -240,12 +390,14 @@ const categoryLabel = categorySlug ? CATEGORIES[categorySlug] : null;
 		border-radius: var(--radius-lg);
 		padding: 1.25rem;
 	}
+	.toc-widget { background: var(--color-primary-light); border-color: #bfdbfe; }
 	.widget-title {
 		font-size: 0.9rem;
 		font-weight: 700;
-		margin-bottom: 0.9rem;
+		margin: 0 0 0.9rem;
 		padding-bottom: 0.6rem;
 		border-bottom: 2px solid var(--color-primary);
+		color: var(--color-text);
 	}
 	.widget-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.25rem; }
 	.widget-list a {
@@ -266,9 +418,12 @@ const categoryLabel = categorySlug ? CATEGORIES[categorySlug] : null;
 	.widget-text { font-size: 0.85rem; color: var(--color-text-muted); line-height: 1.7; margin-bottom: 0.75rem; }
 	.widget-link { font-size: 0.85rem; font-weight: 600; color: var(--color-primary); }
 
+	/* Responsive */
 	@media (max-width: 860px) {
 		.article-layout { grid-template-columns: 1fr; }
 		.sidebar { position: static; display: grid; grid-template-columns: repeat(2, 1fr); }
+		.toc-mobile { display: block; }
+		.toc-widget { display: none; }
 	}
 	@media (max-width: 560px) {
 		.article-layout { padding: 1.5rem 1rem 3rem; }
