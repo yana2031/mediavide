@@ -180,7 +180,7 @@ const breadcrumbJsonLd = {
 				<!-- TOC（デスクトップ用） -->
 				{tocHeadings.length >= 3 && (
 					<div class="sidebar-widget toc-widget">
-						<h2 class="widget-title">📋 目次</h2>
+						<h3 class="widget-title">📋 目次</h3>
 						<nav aria-label="目次">
 							<ol class="toc-list">
 								{tocHeadings.map(h => (
@@ -195,7 +195,7 @@ const breadcrumbJsonLd = {
 
 				<!-- Category Widget -->
 				<div class="sidebar-widget">
-					<h2 class="widget-title">📂 カテゴリー</h2>
+					<h3 class="widget-title">📂 カテゴリー</h2>
 					<ul class="widget-list">
 						{Object.entries(CATEGORIES).map(([slug, label]) => (
 							<li>
@@ -213,7 +213,7 @@ const breadcrumbJsonLd = {
 
 				<!-- About Widget -->
 				<div class="sidebar-widget">
-					<h2 class="widget-title">📌 サイトについて</h2>
+					<h3 class="widget-title">📌 サイトについて</h2>
 					<p class="widget-text">オンライン資格講座の比較・レビュー情報を発信。社会人の資格取得を応援するメディアです。</p>
 					<a href="/about/" class="widget-link">詳しく見る →</a>
 				</div>
@@ -233,6 +233,8 @@ const breadcrumbJsonLd = {
 		gap: 2.5rem;
 		align-items: start;
 	}
+
+	main { min-width: 0; }
 
 	/* Breadcrumb */
 	.breadcrumb {
@@ -383,7 +385,17 @@ const breadcrumbJsonLd = {
 	.footer-link-muted { color: var(--color-text-muted); font-weight: 400; }
 
 	/* Sidebar */
-	.sidebar { position: sticky; top: 80px; display: flex; flex-direction: column; gap: 1.25rem; }
+	.sidebar {
+		position: sticky;
+		top: 80px;
+		display: flex;
+		flex-direction: column;
+		gap: 1.25rem;
+		max-height: calc(100vh - 96px);
+		overflow-y: auto;
+		scrollbar-width: thin;
+		min-width: 0;
+	}
 	.sidebar-widget {
 		background: var(--color-surface);
 		border: 1px solid var(--color-border);
