@@ -87,13 +87,6 @@ const breadcrumbJsonLd = {
 						<span class="current" aria-current="page">{title}</span>
 					</nav>
 
-					<!-- Hero Image -->
-					{heroImage && (
-						<div class="hero-image">
-							<img src={heroImage} alt={title} itemprop="image" loading="eager" />
-						</div>
-					)}
-
 					<!-- Article Header -->
 					<header class="article-header">
 						{category && categoryLabel && (
@@ -125,6 +118,13 @@ const breadcrumbJsonLd = {
 							<p class="article-desc" itemprop="description">{description}</p>
 						)}
 					</header>
+
+					<!-- Hero Image -->
+					{heroImage && (
+						<div class="hero-image">
+							<img src={heroImage} alt={title} itemprop="image" loading="eager" />
+						</div>
+					)}
 
 					<!-- TOC（モバイル用：本文前） -->
 					{tocHeadings.length >= 3 && (
@@ -192,7 +192,7 @@ const breadcrumbJsonLd = {
 						{Object.entries(CATEGORIES).map(([slug, label]) => (
 							<li>
 								<a
-									href={`/category/${slug}/`}
+									href={`/${slug}/`}
 									class:list={[{ active: slug === category }]}
 									aria-current={slug === category ? 'page' : undefined}
 								>
@@ -345,12 +345,14 @@ const breadcrumbJsonLd = {
 		margin-top: 2.5em;
 		padding-bottom: 0.4em;
 		border-bottom: 2px solid var(--color-border);
+		scroll-margin-top: 80px;
 	}
 	.prose :global(h3) {
 		font-size: 1.15rem;
 		margin-top: 2em;
 		padding-left: 0.75em;
 		border-left: 4px solid var(--color-primary);
+		scroll-margin-top: 80px;
 	}
 	.prose :global(p) { margin-bottom: 1.5em; }
 	.prose :global(ul), .prose :global(ol) { padding-left: 1.5em; margin-bottom: 1.5em; }
