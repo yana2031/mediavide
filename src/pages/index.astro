@@ -11,11 +11,11 @@ const posts = (await getCollection('blog')).sort(
 ).slice(0, 6);
 
 const categories = [
-	{ icon: '🏆', label: '講座比較・レビュー', desc: '人気講座を徹底比較' },
-	{ icon: '⚖️', label: '独学 vs 通信講座', desc: 'あなたに合う方法を探す' },
-	{ icon: '💼', label: '社会人の学習法', desc: 'スキマ時間で合格へ' },
-	{ icon: '💻', label: 'eラーニング紹介', desc: 'おすすめサービスを紹介' },
-	{ icon: '🏠', label: '在宅で取れる資格', desc: '人気資格ランキング' },
+	{ slug: 'shikaku-hikaku',      icon: '🏆', label: '資格・講座比較レビュー', desc: '人気講座を徹底比較' },
+	{ slug: 'dokugaku-vs-tsushin', icon: '⚖️', label: '独学 vs 通信講座',       desc: 'あなたに合う方法を探す' },
+	{ slug: 'shakaijin-study',     icon: '💼', label: '社会人の学習法',         desc: 'スキマ時間で合格へ' },
+	{ slug: 'elearning',           icon: '💻', label: 'eラーニング紹介',        desc: 'おすすめサービスを紹介' },
+	{ slug: 'zaitaku-shikaku',     icon: '🏠', label: '在宅で取れる資格',       desc: '人気資格ランキング' },
 ];
 ---
 
@@ -50,7 +50,7 @@ const categories = [
 				<ul class="category-grid">
 					{categories.map(cat => (
 						<li>
-							<a href="/blog/" class="category-card">
+							<a href={`/category/${cat.slug}/`} class="category-card">
 								<span class="category-icon">{cat.icon}</span>
 								<span class="category-label">{cat.label}</span>
 								<span class="category-desc">{cat.desc}</span>

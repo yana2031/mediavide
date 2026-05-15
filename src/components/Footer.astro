@@ -6,11 +6,11 @@ const navLinks = [
 	{ href: '/about/', label: 'サイトについて' },
 ];
 const categories = [
-	{ label: '講座比較・レビュー' },
-	{ label: '独学 vs 通信講座' },
-	{ label: '社会人の学習法' },
-	{ label: 'eラーニング紹介' },
-	{ label: '在宅で取れる資格' },
+	{ slug: 'shikaku-hikaku',      label: '資格・講座比較レビュー' },
+	{ slug: 'dokugaku-vs-tsushin', label: '独学 vs 通信講座' },
+	{ slug: 'shakaijin-study',     label: '社会人の学習法' },
+	{ slug: 'elearning',           label: 'eラーニング紹介' },
+	{ slug: 'zaitaku-shikaku',     label: '在宅で取れる資格' },
 ];
 ---
 
@@ -32,7 +32,7 @@ const categories = [
 			<h3>カテゴリー</h3>
 			<ul>
 				{categories.map(cat => (
-					<li><a href="/blog/">{cat.label}</a></li>
+					<li><a href={`/category/${cat.slug}/`}>{cat.label}</a></li>
 				))}
 			</ul>
 		</div>
