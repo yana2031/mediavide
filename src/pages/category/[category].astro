@@ -10,7 +10,7 @@ export async function getStaticPaths() {
 	const allPosts = await getCollection('blog');
 	return Object.entries(CATEGORIES).map(([slug, label]) => {
 		const posts = allPosts
-			.filter(p => p.id.startsWith(slug + '/'))
+			.filter(p => p.data.category === slug)
 			.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 		return { params: { category: slug }, props: { label, posts } };
 	});
@@ -58,7 +58,7 @@ const description = `${label}に関する記事一覧。オンライン資格講
 						{posts.map(post => <ArticleCard post={post} />)}
 					</div>
 				: <div class="empty">
-						<p>このカテゴリーの記事は準備中です。<a href="/blog/">全記事一覧</a>をご覧ください。</p>
+						<p>このカテゴリーの記事は準備中です。<a href="/">トップページ</a>をご覧ください。</p>
 					</div>
 			}
 		</main>

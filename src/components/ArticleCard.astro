@@ -10,10 +10,9 @@ interface Props {
 }
 
 const { post, featured = false } = Astro.props;
-const { title, description, pubDate, heroImage } = post.data;
+const { title, description, pubDate, heroImage, category } = post.data;
 
-const categorySlug = post.id.includes('/') ? post.id.split('/')[0] : null;
-const categoryLabel = categorySlug ? CATEGORIES[categorySlug] : null;
+const categoryLabel = category ? CATEGORIES[category] : null;
 
 const gradients = [
 	'linear-gradient(135deg, #1d4ed8 0%, #3b82f6 100%)',
@@ -34,12 +33,8 @@ const gradient = gradients[title.charCodeAt(0) % gradients.length];
 						<span class="card-gradient-icon">📝</span>
 					</div>
 			}
-			{categoryLabel && (
-				<a
-					href={`/category/${categorySlug}/`}
-					class="category-badge"
-					onclick="event.stopPropagation()"
-				>
+			{categoryLabel && category && (
+				<a href={`/category/${category}/`} class="category-badge" onclick="event.stopPropagation()">
 					{categoryLabel}
 				</a>
 			)}
@@ -61,17 +56,8 @@ const gradient = gradients[title.charCodeAt(0) % gradients.length];
 		box-shadow: var(--shadow-sm);
 		transition: box-shadow 0.2s, transform 0.2s;
 	}
-	.card:hover {
-		box-shadow: var(--shadow-md);
-		transform: translateY(-3px);
-	}
-	.card-link {
-		display: flex;
-		flex-direction: column;
-		height: 100%;
-		text-decoration: none;
-		color: inherit;
-	}
+	.card:hover { box-shadow: var(--shadow-md); transform: translateY(-3px); }
+	.card-link { display: flex; flex-direction: column; height: 100%; text-decoration: none; color: inherit; }
 	.card-link:hover { text-decoration: none; }
 
 	.card-image {
@@ -81,20 +67,8 @@ const gradient = gradients[title.charCodeAt(0) % gradients.length];
 		overflow: hidden;
 		flex-shrink: 0;
 	}
-	.card-image :global(img) {
-		width: 100%;
-		height: 100%;
-		object-fit: cover;
-		border-radius: 0;
-		display: block;
-	}
-	.card-gradient {
-		width: 100%;
-		height: 100%;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-	}
+	.card-image :global(img) { width: 100%; height: 100%; object-fit: cover; border-radius: 0; display: block; }
+	.card-gradient { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
 	.card-gradient-icon { font-size: 2.5rem; opacity: 0.7; }
 
 	.category-badge {
@@ -108,28 +82,14 @@ const gradient = gradients[title.charCodeAt(0) % gradients.length];
 		padding: 0.25em 0.7em;
 		border-radius: 999px;
 		text-decoration: none;
-		line-height: 1.4;
 		backdrop-filter: blur(4px);
-		transition: background 0.15s;
+		transition: background 0.15s, color 0.15s;
 		z-index: 1;
 	}
-	.category-badge:hover {
-		background: var(--color-primary);
-		color: #ffffff;
-		text-decoration: none;
-	}
+	.category-badge:hover { background: var(--color-primary); color: #fff; text-decoration: none; }
 
-	.card-body {
-		padding: 1.1rem 1.25rem 1.4rem;
-		display: flex;
-		flex-direction: column;
-		flex: 1;
-	}
-	.card-date {
-		font-size: 0.78rem;
-		color: var(--color-text-muted);
-		margin: 0 0 0.4rem;
-	}
+	.card-body { padding: 1.1rem 1.25rem 1.4rem; display: flex; flex-direction: column; flex: 1; }
+	.card-date { font-size: 0.78rem; color: var(--color-text-muted); margin: 0 0 0.4rem; }
 	.card-title {
 		font-size: 0.975rem;
 		font-weight: 700;
@@ -154,12 +114,7 @@ const gradient = gradients[title.charCodeAt(0) % gradients.length];
 		overflow: hidden;
 		flex: 1;
 	}
-	.card-more {
-		font-size: 0.82rem;
-		font-weight: 700;
-		color: var(--color-primary);
-		margin-top: auto;
-	}
+	.card-more { font-size: 0.82rem; font-weight: 700; color: var(--color-primary); margin-top: auto; }
 
 	.featured .card-image { aspect-ratio: 16 / 7; }
 	.featured .card-title { font-size: 1.15rem; -webkit-line-clamp: 2; }

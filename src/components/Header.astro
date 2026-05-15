@@ -1,5 +1,6 @@
 ---
 import HeaderLink from './HeaderLink.astro';
+import { CATEGORIES } from '../consts';
 ---
 
 <header>
@@ -13,8 +14,17 @@ import HeaderLink from './HeaderLink.astro';
 		</a>
 		<nav aria-label="メインナビゲーション">
 			<HeaderLink href="/">ホーム</HeaderLink>
-			<HeaderLink href="/blog">記事一覧</HeaderLink>
-			<HeaderLink href="/about">サイトについて</HeaderLink>
+			<div class="nav-dropdown">
+				<button class="nav-btn" aria-haspopup="true">カテゴリー ▾</button>
+				<ul class="dropdown-menu" role="menu">
+					{Object.entries(CATEGORIES).map(([slug, label]) => (
+						<li role="menuitem">
+							<a href={`/category/${slug}/`}>{label}</a>
+						</li>
+					))}
+				</ul>
+			</div>
+			<HeaderLink href="/about/">サイトについて</HeaderLink>
 		</nav>
 	</div>
 </header>
@@ -26,7 +36,7 @@ import HeaderLink from './HeaderLink.astro';
 		position: sticky;
 		top: 0;
 		z-index: 100;
-		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+		box-shadow: 0 2px 8px rgba(0,0,0,0.06);
 	}
 	.header-inner {
 		max-width: var(--max-width);
@@ -38,39 +48,14 @@ import HeaderLink from './HeaderLink.astro';
 		height: 64px;
 		gap: 1rem;
 	}
-	.logo {
-		display: flex;
-		align-items: center;
-		gap: 0.6rem;
-		text-decoration: none;
-		flex-shrink: 0;
-	}
+	.logo { display: flex; align-items: center; gap: 0.6rem; text-decoration: none; flex-shrink: 0; }
 	.logo:hover { text-decoration: none; }
-	.logo-icon {
-		font-size: 1.6rem;
-		line-height: 1;
-	}
-	.logo-text {
-		display: flex;
-		flex-direction: column;
-		line-height: 1.2;
-	}
-	.logo-main {
-		font-size: 1.05rem;
-		font-weight: 700;
-		color: var(--color-primary);
-		letter-spacing: -0.02em;
-	}
-	.logo-sub {
-		font-size: 0.65rem;
-		color: var(--color-text-muted);
-		font-weight: 400;
-	}
-	nav {
-		display: flex;
-		align-items: center;
-		gap: 0.25rem;
-	}
+	.logo-icon { font-size: 1.6rem; line-height: 1; }
+	.logo-text { display: flex; flex-direction: column; line-height: 1.2; }
+	.logo-main { font-size: 1.05rem; font-weight: 700; color: var(--color-primary); letter-spacing: -0.02em; }
+	.logo-sub { font-size: 0.65rem; color: var(--color-text-muted); font-weight: 400; }
+
+	nav { display: flex; align-items: center; gap: 0.25rem; }
 	nav :global(a) {
 		padding: 0.45em 0.85em;
 		border-radius: var(--radius-sm);
@@ -81,21 +66,58 @@ import HeaderLink from './HeaderLink.astro';
 		transition: background 0.15s, color 0.15s;
 		white-space: nowrap;
 	}
-	nav :global(a:hover) {
+	nav :global(a:hover), nav :global(a.active) {
 		background: var(--color-primary-light);
 		color: var(--color-primary);
 		text-decoration: none;
 	}
-	nav :global(a.active) {
-		background: var(--color-primary-light);
-		color: var(--color-primary);
-		font-weight: 700;
+	nav :global(a.active) { font-weight: 700; }
+
+	/* Dropdown */
+	.nav-dropdown { position: relative; }
+	.nav-btn {
+		padding: 0.45em 0.85em;
+		border-radius: var(--radius-sm);
+		font-size: 0.9rem;
+		font-weight: 500;
+		color: var(--color-text);
+		background: none;
+		border: none;
+		cursor: pointer;
+		white-space: nowrap;
+		font-family: inherit;
+		transition: background 0.15s, color 0.15s;
 	}
+	.nav-btn:hover { background: var(--color-primary-light); color: var(--color-primary); }
+	.dropdown-menu {
+		display: none;
+		position: absolute;
+		top: calc(100% + 4px);
+		left: 0;
+		background: #fff;
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-md);
+		box-shadow: var(--shadow-md);
+		list-style: none;
+		padding: 0.4rem 0;
+		margin: 0;
+		min-width: 200px;
+		z-index: 200;
+	}
+	.nav-dropdown:hover .dropdown-menu,
+	.nav-dropdown:focus-within .dropdown-menu { display: block; }
+	.dropdown-menu a {
+		display: block;
+		padding: 0.55em 1.1em;
+		font-size: 0.875rem;
+		color: var(--color-text);
+		text-decoration: none;
+		transition: background 0.12s;
+	}
+	.dropdown-menu a:hover { background: var(--color-primary-light); color: var(--color-primary); }
+
 	@media (max-width: 600px) {
 		.logo-sub { display: none; }
-		nav :global(a) {
-			padding: 0.4em 0.6em;
-			font-size: 0.85rem;
-		}
+		nav :global(a), .nav-btn { padding: 0.4em 0.6em; font-size: 0.85rem; }
 	}
 </style>

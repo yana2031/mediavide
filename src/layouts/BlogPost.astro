@@ -11,9 +11,10 @@ type Props = CollectionEntry<'blog'>['data'];
 
 const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
 
-// カテゴリーをURLから取得 /blog/[category]/[slug]/
+// カテゴリーはfrontmatterから取得、なければURLから補完
+const { category: frontmatterCategory } = Astro.props as any;
 const pathParts = Astro.url.pathname.split('/').filter(Boolean);
-const categorySlug = pathParts.length >= 3 ? pathParts[1] : null;
+const categorySlug = frontmatterCategory ?? (pathParts.length >= 3 ? pathParts[1] : null);
 const categoryLabel = categorySlug ? CATEGORIES[categorySlug] : null;
 ---
 
