@@ -340,23 +340,77 @@ const breadcrumbJsonLd = {
 
 	/* Article Body */
 	.prose { font-size: 1.0625rem; line-height: 1.9; color: var(--color-text); }
+
+	/* h2: 左アクセントバー + グラデーション背景 */
 	.prose :global(h2) {
 		font-size: 1.35rem;
-		margin-top: 2.5em;
-		padding-bottom: 0.4em;
-		border-bottom: 2px solid var(--color-border);
+		margin-top: 2.75em;
+		margin-bottom: 1em;
+		padding: 0.65em 1.1em;
+		background: linear-gradient(to right, var(--color-primary-light) 0%, rgba(239,246,255,0) 80%);
+		border-left: 5px solid var(--color-primary);
+		border-radius: 0 var(--radius-md) var(--radius-md) 0;
 		scroll-margin-top: 80px;
+		color: var(--color-text);
 	}
+
+	/* h3: アクセントカラー左バー + 薄い背景 */
 	.prose :global(h3) {
-		font-size: 1.15rem;
+		font-size: 1.12rem;
 		margin-top: 2em;
-		padding-left: 0.75em;
-		border-left: 4px solid var(--color-primary);
+		margin-bottom: 0.75em;
+		padding: 0.4em 0.9em;
+		border-left: 3px solid var(--color-accent);
+		background: #fffbeb;
+		border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
 		scroll-margin-top: 80px;
+		color: var(--color-text);
 	}
+
+	/* strong: プライマリカラーで強調 */
+	.prose :global(strong) {
+		color: var(--color-primary-dark);
+		font-weight: 700;
+	}
+
 	.prose :global(p) { margin-bottom: 1.5em; }
-	.prose :global(ul), .prose :global(ol) { padding-left: 1.5em; margin-bottom: 1.5em; }
-	.prose :global(li) { margin-bottom: 0.5em; }
+
+	/* ul: カラードット */
+	.prose :global(ul) {
+		list-style: none;
+		padding-left: 1.5em;
+		margin-bottom: 1.5em;
+	}
+	.prose :global(ul li) {
+		position: relative;
+		padding-left: 0.25em;
+		margin-bottom: 0.5em;
+	}
+	.prose :global(ul li)::before {
+		content: '';
+		position: absolute;
+		left: -1.1em;
+		top: 0.7em;
+		width: 6px;
+		height: 6px;
+		border-radius: 50%;
+		background: var(--color-primary);
+	}
+
+	/* ol: 番号をプライマリカラーで */
+	.prose :global(ol) {
+		padding-left: 1.75em;
+		margin-bottom: 1.5em;
+	}
+	.prose :global(ol li) {
+		margin-bottom: 0.5em;
+		padding-left: 0.25em;
+	}
+	.prose :global(ol li::marker) {
+		color: var(--color-primary);
+		font-weight: 700;
+	}
+
 	.prose :global(img) {
 		width: 100%;
 		height: auto;
