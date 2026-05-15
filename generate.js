@@ -6,7 +6,7 @@ const client = new Anthropic();
 const today = new Date().toISOString().split("T")[0];
 
 const response = await client.messages.create({
-  model: "claude-sonnet-4-20250514",
+  model: "claude-sonnet-4-5",
   max_tokens: 2000,
   messages: [
     {
