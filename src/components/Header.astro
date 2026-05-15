@@ -1,46 +1,101 @@
 ---
-import { SITE_TITLE } from '../consts';
 import HeaderLink from './HeaderLink.astro';
 ---
 
 <header>
-	<nav>
-		<h2><a href="/">{SITE_TITLE}</a></h2>
-		<div class="internal-links">
+	<div class="header-inner">
+		<a href="/" class="logo" aria-label="shikaku-online トップページ">
+			<span class="logo-icon">📚</span>
+			<span class="logo-text">
+				<span class="logo-main">shikaku-online</span>
+				<span class="logo-sub">資格・オンライン講座の比較メディア</span>
+			</span>
+		</a>
+		<nav aria-label="メインナビゲーション">
 			<HeaderLink href="/">ホーム</HeaderLink>
 			<HeaderLink href="/blog">記事一覧</HeaderLink>
 			<HeaderLink href="/about">サイトについて</HeaderLink>
-		</div>
-	</nav>
+		</nav>
+	</div>
 </header>
+
 <style>
 	header {
-		margin: 0;
-		padding: 0 1em;
-		background: white;
-		box-shadow: 0 2px 8px rgba(var(--black), 5%);
+		background: #ffffff;
+		border-bottom: 1px solid var(--color-border);
+		position: sticky;
+		top: 0;
+		z-index: 100;
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 	}
-	h2 {
-		margin: 0;
-		font-size: 1em;
+	.header-inner {
+		max-width: var(--max-width);
+		margin: 0 auto;
+		padding: 0 1.5rem;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		height: 64px;
+		gap: 1rem;
 	}
-	h2 a,
-	h2 a.active {
+	.logo {
+		display: flex;
+		align-items: center;
+		gap: 0.6rem;
 		text-decoration: none;
+		flex-shrink: 0;
+	}
+	.logo:hover { text-decoration: none; }
+	.logo-icon {
+		font-size: 1.6rem;
+		line-height: 1;
+	}
+	.logo-text {
+		display: flex;
+		flex-direction: column;
+		line-height: 1.2;
+	}
+	.logo-main {
+		font-size: 1.05rem;
+		font-weight: 700;
+		color: var(--color-primary);
+		letter-spacing: -0.02em;
+	}
+	.logo-sub {
+		font-size: 0.65rem;
+		color: var(--color-text-muted);
+		font-weight: 400;
 	}
 	nav {
 		display: flex;
 		align-items: center;
-		justify-content: space-between;
+		gap: 0.25rem;
 	}
-	nav a {
-		padding: 1em 0.5em;
-		color: var(--black);
-		border-bottom: 4px solid transparent;
+	nav :global(a) {
+		padding: 0.45em 0.85em;
+		border-radius: var(--radius-sm);
+		font-size: 0.9rem;
+		font-weight: 500;
+		color: var(--color-text);
+		text-decoration: none;
+		transition: background 0.15s, color 0.15s;
+		white-space: nowrap;
+	}
+	nav :global(a:hover) {
+		background: var(--color-primary-light);
+		color: var(--color-primary);
 		text-decoration: none;
 	}
-	nav a.active {
-		text-decoration: none;
-		border-bottom-color: var(--accent);
+	nav :global(a.active) {
+		background: var(--color-primary-light);
+		color: var(--color-primary);
+		font-weight: 700;
+	}
+	@media (max-width: 600px) {
+		.logo-sub { display: none; }
+		nav :global(a) {
+			padding: 0.4em 0.6em;
+			font-size: 0.85rem;
+		}
 	}
 </style>

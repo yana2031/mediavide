@@ -1,19 +1,125 @@
 ---
 const today = new Date();
+const navLinks = [
+	{ href: '/', label: 'ホーム' },
+	{ href: '/blog/', label: '記事一覧' },
+	{ href: '/about/', label: 'サイトについて' },
+];
+const categories = [
+	{ label: '講座比較・レビュー' },
+	{ label: '独学 vs 通信講座' },
+	{ label: '社会人の学習法' },
+	{ label: 'eラーニング紹介' },
+	{ label: '在宅で取れる資格' },
+];
 ---
 
 <footer>
-	<p>&copy; {today.getFullYear()} shikaku-online.com All rights reserved.</p>
+	<div class="footer-inner">
+		<div class="footer-brand">
+			<a href="/" class="footer-logo">📚 shikaku-online</a>
+			<p>オンライン資格講座の比較・レビュー情報を発信。<br />社会人の資格取得を応援するメディアです。</p>
+		</div>
+		<div class="footer-nav">
+			<h3>メニュー</h3>
+			<ul>
+				{navLinks.map(link => (
+					<li><a href={link.href}>{link.label}</a></li>
+				))}
+			</ul>
+		</div>
+		<div class="footer-categories">
+			<h3>カテゴリー</h3>
+			<ul>
+				{categories.map(cat => (
+					<li><a href="/blog/">{cat.label}</a></li>
+				))}
+			</ul>
+		</div>
+	</div>
+	<div class="footer-bottom">
+		<p>&copy; {today.getFullYear()} shikaku-online.com All rights reserved.</p>
+	</div>
 </footer>
+
 <style>
 	footer {
-		padding: 2em 1em 4em 1em;
-		background: linear-gradient(var(--gray-gradient)) no-repeat;
-		color: rgb(var(--gray));
-		text-align: center;
+		background: #1e293b;
+		color: #94a3b8;
+		margin-top: 4rem;
 	}
-	footer p {
+	.footer-inner {
+		max-width: var(--max-width);
+		margin: 0 auto;
+		padding: 3rem 1.5rem 2rem;
+		display: grid;
+		grid-template-columns: 2fr 1fr 1.5fr;
+		gap: 2.5rem;
+	}
+	.footer-brand .footer-logo {
+		display: inline-block;
+		font-size: 1.1rem;
+		font-weight: 700;
+		color: #ffffff;
+		text-decoration: none;
+		margin-bottom: 0.75rem;
+	}
+	.footer-brand p {
+		font-size: 0.875rem;
+		line-height: 1.7;
 		margin: 0;
-		font-size: 0.9rem;
+	}
+	.footer-nav h3,
+	.footer-categories h3 {
+		font-size: 0.8rem;
+		font-weight: 700;
+		color: #ffffff;
+		text-transform: uppercase;
+		letter-spacing: 0.08em;
+		margin-bottom: 0.9rem;
+	}
+	.footer-nav ul,
+	.footer-categories ul {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 0.45rem;
+	}
+	.footer-nav a,
+	.footer-categories a {
+		font-size: 0.875rem;
+		color: #94a3b8;
+		text-decoration: none;
+		transition: color 0.15s;
+	}
+	.footer-nav a:hover,
+	.footer-categories a:hover {
+		color: #ffffff;
+		text-decoration: none;
+	}
+	.footer-bottom {
+		border-top: 1px solid #334155;
+		text-align: center;
+		padding: 1.25rem 1.5rem;
+	}
+	.footer-bottom p {
+		margin: 0;
+		font-size: 0.8rem;
+	}
+	@media (max-width: 768px) {
+		.footer-inner {
+			grid-template-columns: 1fr 1fr;
+		}
+		.footer-brand {
+			grid-column: 1 / -1;
+		}
+	}
+	@media (max-width: 480px) {
+		.footer-inner {
+			grid-template-columns: 1fr;
+			gap: 1.5rem;
+		}
 	}
 </style>
