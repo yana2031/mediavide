@@ -19,6 +19,7 @@ jobs:
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
+          npm install @anthropic-ai/sdk
           node generate.js
 
       - name: Commit and push
