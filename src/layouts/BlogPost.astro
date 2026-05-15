@@ -1,5 +1,4 @@
 ---
-import { Image } from 'astro:assets';
 import type { CollectionEntry } from 'astro:content';
 import BaseHead from '../components/BaseHead.astro';
 import Footer from '../components/Footer.astro';
@@ -91,14 +90,7 @@ const breadcrumbJsonLd = {
 					<!-- Hero Image -->
 					{heroImage && (
 						<div class="hero-image">
-							<Image
-								width={900}
-								height={450}
-								src={heroImage}
-								alt={title}
-								itemprop="image"
-								loading="eager"
-							/>
+							<img src={heroImage} alt={title} itemprop="image" loading="eager" />
 						</div>
 					)}
 
@@ -363,6 +355,14 @@ const breadcrumbJsonLd = {
 	.prose :global(p) { margin-bottom: 1.5em; }
 	.prose :global(ul), .prose :global(ol) { padding-left: 1.5em; margin-bottom: 1.5em; }
 	.prose :global(li) { margin-bottom: 0.5em; }
+	.prose :global(img) {
+		width: 100%;
+		height: auto;
+		border-radius: var(--radius-md);
+		margin: 1.75em 0;
+		display: block;
+		box-shadow: var(--shadow-sm);
+	}
 
 	/* Article Footer */
 	.article-footer {

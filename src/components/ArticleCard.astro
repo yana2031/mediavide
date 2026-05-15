@@ -1,5 +1,4 @@
 ---
-import { Image } from 'astro:assets';
 import type { CollectionEntry } from 'astro:content';
 import FormattedDate from './FormattedDate.astro';
 import { CATEGORIES } from '../consts';
@@ -34,7 +33,7 @@ const gradient = gradients[title.charCodeAt(0) % gradients.length];
 <article class:list={['card', { featured }]}>
 	<div class="card-image">
 		{heroImage
-			? <Image src={heroImage} width={featured ? 800 : 400} height={featured ? 400 : 200} alt={title} />
+			? <img src={heroImage} alt={title} loading="lazy" />
 			: <div class="card-gradient" style={`background: ${gradient}`}>
 					<span class="card-gradient-icon">📝</span>
 				</div>

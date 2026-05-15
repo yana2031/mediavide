@@ -2,7 +2,7 @@
 title: '社会人が資格取得を成功させる5つの実践的コツ'
 description: '仕事と両立しながら資格取得を目指す社会人のために、限られた時間を有効活用し、効率的に学習を進めるための具体的なコツを解説します。'
 pubDate: '2026-05-15'
-heroImage: '../../../assets/blog-placeholder-2.jpg'
+heroImage: '/images/articles/shikaku-shutoku-tips-hero.jpg'
 category: 'shakaijin-study'
 ---
 
