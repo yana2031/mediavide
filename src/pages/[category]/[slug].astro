@@ -4,17 +4,21 @@ import BlogPost from '../../layouts/BlogPost.astro';
 
 export async function getStaticPaths() {
 	const posts = await getCollection('blog');
-	return posts.map((post) => ({
-		params: { slug: post.id },
-		props: post,
-	}));
+	return posts.map((post) => {
+		const id = post.id.replace(/\\/g, '/');
+		const slug = id.split('/').pop() ?? post.id;
+		const category = post.data.category ?? id.split('/')[0];
+		return {
+			params: { category, slug },
+			props: post,
+		};
+	});
 }
 type Props = CollectionEntry<'blog'>;
 
 const post = Astro.props;
 const { Content, headings } = await render(post);
 
-// 読了時間を本文文字数から算出（日本語: 約600文字/分）
 const rawBody: string = (post as any).body ?? '';
 const charCount = rawBody.replace(/\s+/g, '').length;
 const readingTime = Math.max(1, Math.ceil(charCount / 600));

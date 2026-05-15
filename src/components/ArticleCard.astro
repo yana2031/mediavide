@@ -7,12 +7,18 @@ import { CATEGORIES } from '../consts';
 interface Props {
 	post: CollectionEntry<'blog'>;
 	featured?: boolean;
+	headingLevel?: 2 | 3;
 }
 
-const { post, featured = false } = Astro.props;
+const { post, featured = false, headingLevel = 2 } = Astro.props;
 const { title, description, pubDate, heroImage, category } = post.data;
 
 const categoryLabel = category ? CATEGORIES[category] : null;
+const HeadingTag = `h${headingLevel}` as 'h2' | 'h3';
+
+const _id = post.id.replace(/\\/g, '/');
+const _slug = _id.split('/').pop() ?? post.id;
+const articleHref = category ? `/${category}/${_slug}/` : `/${_id}/`;
 
 const gradients = [
 	'linear-gradient(135deg, #1d4ed8 0%, #3b82f6 100%)',
@@ -25,7 +31,7 @@ const gradient = gradients[title.charCodeAt(0) % gradients.length];
 ---
 
 <article class:list={['card', { featured }]}>
-	<a href={`/blog/${post.id}/`} class="card-link">
+	<a href={articleHref} class="card-link">
 		<div class="card-image">
 			{heroImage
 				? <Image src={heroImage} width={featured ? 800 : 400} height={featured ? 400 : 200} alt={title} />
@@ -34,14 +40,14 @@ const gradient = gradients[title.charCodeAt(0) % gradients.length];
 					</div>
 			}
 			{categoryLabel && category && (
-				<a href={`/category/${category}/`} class="category-badge" onclick="event.stopPropagation()">
+				<a href={`/${category}/`} class="category-badge" onclick="event.stopPropagation()">
 					{categoryLabel}
 				</a>
 			)}
 		</div>
 		<div class="card-body">
 			<p class="card-date"><FormattedDate date={pubDate} /></p>
-			<h2 class="card-title">{title}</h2>
+			<HeadingTag class="card-title">{title}</HeadingTag>
 			{description && <p class="card-desc">{description}</p>}
 			<span class="card-more">続きを読む →</span>
 		</div>

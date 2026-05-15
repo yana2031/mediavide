@@ -2,7 +2,6 @@
 const today = new Date();
 const navLinks = [
 	{ href: '/', label: 'ホーム' },
-	{ href: '/blog/', label: '記事一覧' },
 	{ href: '/about/', label: 'サイトについて' },
 ];
 const categories = [
@@ -32,7 +31,7 @@ const categories = [
 			<h3>カテゴリー</h3>
 			<ul>
 				{categories.map(cat => (
-					<li><a href={`/category/${cat.slug}/`}>{cat.label}</a></li>
+					<li><a href={`/${cat.slug}/`}>{cat.label}</a></li>
 				))}
 			</ul>
 		</div>

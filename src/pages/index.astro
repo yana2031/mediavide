@@ -50,7 +50,7 @@ const categories = [
 				<ul class="category-grid">
 					{categories.map(cat => (
 						<li>
-							<a href={`/category/${cat.slug}/`} class="category-card">
+							<a href={`/${cat.slug}/`} class="category-card">
 								<span class="category-icon">{cat.icon}</span>
 								<span class="category-label">{cat.label}</span>
 								<span class="category-desc">{cat.desc}</span>
@@ -66,7 +66,7 @@ const categories = [
 					<h2 class="section-title">🆕 新着記事</h2>
 					<div class="article-grid">
 						{posts.map((post, i) => (
-							<ArticleCard post={post} featured={i === 0} />
+							<ArticleCard post={post} featured={i === 0} headingLevel={3} />
 						))}
 					</div>
 					<div class="view-all">
