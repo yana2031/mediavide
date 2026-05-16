@@ -210,7 +210,7 @@ if (!fs.existsSync(IMAGES_PUBLIC_DIR)) fs.mkdirSync(IMAGES_PUBLIC_DIR, { recursi
 const heroQuery  = imageQueries[0] ?? CATEGORY_KEYWORDS[categorySlug];
 console.log(`\n🖼  ヒーロー画像: "${heroQuery}"`);
 const heroPath   = `${IMAGES_PUBLIC_DIR}/${urlSlug}-hero.jpg`;
-const heroOk     = await generateAiImage(heroQuery, heroPath, "1792x1024");
+const heroOk     = await generateAiImage(heroQuery, heroPath, "1536x1024");
 const heroPublic = heroOk ? `/images/articles/${urlSlug}-hero.jpg` : "";
 
 const bodyImgOk = [];
