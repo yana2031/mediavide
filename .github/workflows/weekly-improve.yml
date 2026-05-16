@@ -38,7 +38,7 @@ jobs:
 
       - name: Create Pull Request
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
           if git diff --quiet && git diff --staged --quiet; then
             echo "✅ 改善が必要な記事はありませんでした"
