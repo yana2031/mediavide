@@ -1,0 +1,55 @@
+name: Weekly Content Improvement
+
+permissions:
+  contents: write
+  pull-requests: write
+
+on:
+  schedule:
+    - cron: '0 2 * * 1'  # 毎週月曜 AM 11:00 JST
+  workflow_dispatch:      # 手動実行も可能
+
+jobs:
+  improve:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Fetch analytics data
+        env:
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          GSC_SITE_URL: ${{ secrets.GSC_SITE_URL }}
+          GA4_PROPERTY_ID: ${{ secrets.GA4_PROPERTY_ID }}
+        run: node scripts/fetch-analytics.mjs
+
+      - name: Improve content with Claude
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: node scripts/improve-content.mjs
+
+      - name: Check for changes
+        id: changes
+        run: |
+          git diff --quiet && echo "changed=false" >> $GITHUB_OUTPUT || echo "changed=true" >> $GITHUB_OUTPUT
+
+      - name: Create Pull Request
+        if: steps.changes.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: auto/content-improvement-${{ github.run_number }}
+          title: '🤖 コンテンツ自動改善 (${{ github.run_number }})'
+          body-path: improvement-report.md
+          commit-message: 'Auto-improve content based on GSC/GA4 analysis'
+          labels: auto-improvement
+
+      - name: No changes
+        if: steps.changes.outputs.changed == 'false'
+        run: echo "✅ 改善が必要な記事はありませんでした"
