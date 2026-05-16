@@ -1,0 +1,133 @@
+---
+import { getCollection } from 'astro:content';
+import BaseHead from '../../components/BaseHead.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import ArticleCard from '../../components/ArticleCard.astro';
+import { SITE_TITLE, CATEGORIES } from '../../consts';
+
+const allPosts = (await getCollection('blog')).sort(
+	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+);
+
+const title = `全記事一覧 | ${SITE_TITLE}`;
+const description = '資格取得・通信講座・社会人の学習法に関する全記事の一覧です。';
+---
+
+<!doctype html>
+<html lang="ja">
+	<head>
+		<BaseHead title={title} description={description} />
+	</head>
+	<body>
+		<Header />
+		<main>
+			<nav class="breadcrumb" aria-label="パンくずリスト">
+				<a href="/">ホーム</a>
+				<span aria-hidden="true">›</span>
+				<span>全記事一覧</span>
+			</nav>
+
+			<div class="page-header">
+				<span class="page-icon">📄</span>
+				<div>
+					<h1>全記事一覧</h1>
+					<p>{allPosts.length}件の記事</p>
+				</div>
+			</div>
+
+			<!-- Category filter -->
+			<div class="filter-bar">
+				<span class="filter-label">カテゴリー：</span>
+				<div class="filter-chips">
+					<a href="/articles/" class="chip active">すべて</a>
+					{Object.entries(CATEGORIES).map(([slug, label]) => (
+						<a href={`/${slug}/`} class="chip">{label}</a>
+					))}
+				</div>
+			</div>
+
+			{allPosts.length > 0
+				? <div class="article-grid">
+						{allPosts.map(post => <ArticleCard post={post} />)}
+					</div>
+				: <div class="empty">
+						<p>記事はまだありません。</p>
+					</div>
+			}
+		</main>
+		<Footer />
+	</body>
+</html>
+
+<style>
+	.breadcrumb {
+		display: flex;
+		align-items: center;
+		gap: 0.4em;
+		font-size: 0.82rem;
+		color: var(--color-text-muted);
+		margin-bottom: 1.5rem;
+	}
+	.breadcrumb a { color: var(--color-text-muted); text-decoration: none; }
+	.breadcrumb a:hover { color: var(--color-primary); }
+
+	.page-header {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+		background: var(--color-surface);
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-lg);
+		padding: 1.5rem 2rem;
+		margin-bottom: 1.5rem;
+	}
+	.page-icon { font-size: 2.5rem; line-height: 1; }
+	.page-header h1 { margin: 0 0 0.25rem; font-size: 1.5rem; }
+	.page-header p { margin: 0; color: var(--color-text-muted); font-size: 0.9rem; }
+
+	.filter-bar {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		margin-bottom: 1.75rem;
+		flex-wrap: wrap;
+	}
+	.filter-label { font-size: 0.85rem; color: var(--color-text-muted); white-space: nowrap; }
+	.filter-chips { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+	.chip {
+		display: inline-block;
+		padding: 0.3em 0.9em;
+		border-radius: 999px;
+		font-size: 0.8rem;
+		font-weight: 600;
+		background: var(--color-surface);
+		border: 1px solid var(--color-border);
+		color: var(--color-text-muted);
+		text-decoration: none;
+		transition: background 0.12s, color 0.12s, border-color 0.12s;
+	}
+	.chip:hover, .chip.active {
+		background: var(--color-primary);
+		border-color: var(--color-primary);
+		color: #fff;
+		text-decoration: none;
+	}
+
+	.article-grid {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		gap: 1.25rem;
+	}
+	.empty {
+		text-align: center;
+		padding: 3rem 1rem;
+		color: var(--color-text-muted);
+		background: var(--color-surface);
+		border-radius: var(--radius-lg);
+		border: 1px dashed var(--color-border);
+	}
+
+	@media (max-width: 900px) { .article-grid { grid-template-columns: repeat(2, 1fr); } }
+	@media (max-width: 560px) { .article-grid { grid-template-columns: 1fr; } }
+</style>

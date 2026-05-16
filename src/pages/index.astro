@@ -37,7 +37,7 @@ const categories = [
 					独学・通信・eラーニングの違いから、効率的な学習法まで発信しています。
 				</p>
 				<div class="hero-actions">
-					<a href="/blog/" class="btn-primary">記事を読む</a>
+					<a href="#recent" class="btn-primary">記事を読む</a>
 					<a href="/about/" class="btn-secondary">サイトについて</a>
 				</div>
 			</div>
@@ -62,7 +62,7 @@ const categories = [
 
 			<!-- Recent Articles -->
 			{posts.length > 0 && (
-				<section class="section">
+				<section class="section" id="recent">
 					<h2 class="section-title">🆕 新着記事</h2>
 					<div class="article-grid">
 						{posts.map((post, i) => (
@@ -70,7 +70,7 @@ const categories = [
 						))}
 					</div>
 					<div class="view-all">
-						<a href="/blog/" class="btn-outline">すべての記事を見る →</a>
+						<a href="/articles/" class="btn-outline">すべての記事を見る →</a>
 					</div>
 				</section>
 			)}
