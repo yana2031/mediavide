@@ -12,7 +12,12 @@ import { CATEGORIES } from '../consts';
 				<span class="logo-sub">資格・オンライン講座の比較メディア</span>
 			</span>
 		</a>
-		<nav aria-label="メインナビゲーション">
+
+		<button class="hamburger" id="hamburger" aria-label="メニューを開く" aria-expanded="false">
+			<span></span><span></span><span></span>
+		</button>
+
+		<nav id="main-nav" aria-label="メインナビゲーション">
 			<HeaderLink href="/">ホーム</HeaderLink>
 			<div class="nav-dropdown">
 				<button class="nav-btn" aria-haspopup="true">カテゴリー ▾</button>
@@ -28,6 +33,24 @@ import { CATEGORIES } from '../consts';
 		</nav>
 	</div>
 </header>
+
+<script>
+	const btn = document.getElementById('hamburger')!;
+	const nav = document.getElementById('main-nav')!;
+	btn.addEventListener('click', () => {
+		const open = nav.classList.toggle('open');
+		btn.setAttribute('aria-expanded', String(open));
+		btn.classList.toggle('active', open);
+	});
+	// ナビ内リンクをクリックしたら閉じる
+	nav.querySelectorAll('a').forEach(a =>
+		a.addEventListener('click', () => {
+			nav.classList.remove('open');
+			btn.classList.remove('active');
+			btn.setAttribute('aria-expanded', 'false');
+		})
+	);
+</script>
 
 <style>
 	header {
@@ -45,16 +68,43 @@ import { CATEGORIES } from '../consts';
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		height: 64px;
+		height: 56px;
 		gap: 1rem;
 	}
-	.logo { display: flex; align-items: center; gap: 0.6rem; text-decoration: none; flex-shrink: 0; }
+	.logo { display: flex; align-items: center; gap: 0.5rem; text-decoration: none; flex-shrink: 0; min-width: 0; }
 	.logo:hover { text-decoration: none; }
-	.logo-icon { font-size: 1.6rem; line-height: 1; }
-	.logo-text { display: flex; flex-direction: column; line-height: 1.2; }
-	.logo-main { font-size: 1.05rem; font-weight: 700; color: var(--color-primary); letter-spacing: -0.02em; }
-	.logo-sub { font-size: 0.65rem; color: var(--color-text-muted); font-weight: 400; }
+	.logo-icon { font-size: 1.4rem; line-height: 1; flex-shrink: 0; }
+	.logo-text { display: flex; flex-direction: column; line-height: 1.2; min-width: 0; }
+	.logo-main { font-size: 1rem; font-weight: 700; color: var(--color-primary); letter-spacing: -0.02em; white-space: nowrap; }
+	.logo-sub { font-size: 0.62rem; color: var(--color-text-muted); font-weight: 400; white-space: nowrap; }
 
+	/* ── Hamburger ── */
+	.hamburger {
+		display: none;
+		flex-direction: column;
+		justify-content: center;
+		gap: 5px;
+		width: 36px;
+		height: 36px;
+		padding: 6px;
+		background: none;
+		border: none;
+		cursor: pointer;
+		flex-shrink: 0;
+	}
+	.hamburger span {
+		display: block;
+		width: 100%;
+		height: 2px;
+		background: var(--color-text);
+		border-radius: 2px;
+		transition: transform 0.25s, opacity 0.25s;
+	}
+	.hamburger.active span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+	.hamburger.active span:nth-child(2) { opacity: 0; }
+	.hamburger.active span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+	/* ── Desktop nav ── */
 	nav { display: flex; align-items: center; gap: 0.25rem; }
 	nav :global(a) {
 		padding: 0.45em 0.85em;
@@ -116,8 +166,52 @@ import { CATEGORIES } from '../consts';
 	}
 	.dropdown-menu a:hover { background: var(--color-primary-light); color: var(--color-primary); }
 
-	@media (max-width: 600px) {
+	/* ── Mobile ── */
+	@media (max-width: 640px) {
 		.logo-sub { display: none; }
-		nav :global(a), .nav-btn { padding: 0.4em 0.6em; font-size: 0.85rem; }
+		.hamburger { display: flex; }
+
+		nav {
+			display: none;
+			flex-direction: column;
+			align-items: stretch;
+			gap: 0;
+			position: absolute;
+			top: 56px;
+			left: 0;
+			right: 0;
+			background: #fff;
+			border-bottom: 1px solid var(--color-border);
+			box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+			padding: 0.5rem 0;
+		}
+		nav.open { display: flex; }
+
+		nav :global(a), .nav-btn {
+			padding: 0.75em 1.5rem;
+			border-radius: 0;
+			font-size: 0.95rem;
+			width: 100%;
+			text-align: left;
+		}
+		nav :global(a:hover), .nav-btn:hover {
+			background: var(--color-primary-light);
+		}
+
+		.nav-dropdown { width: 100%; }
+		.dropdown-menu {
+			position: static;
+			display: block;
+			box-shadow: none;
+			border: none;
+			border-top: 1px solid var(--color-border);
+			border-radius: 0;
+			padding: 0;
+			min-width: unset;
+		}
+		.dropdown-menu a {
+			padding: 0.65em 2.5rem;
+			font-size: 0.9rem;
+		}
 	}
 </style>

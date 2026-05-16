@@ -218,8 +218,17 @@ ${categoryList}
 
 CATEGORY_SLUG: [選んだカテゴリーのslug]
 URL_SLUG: [英語slug、小文字・ハイフン区切り・3〜5単語]
-IMAGE_QUERIES: [ヒーロー画像用英語クエリ3〜5語]|[本文画像1用英語クエリ]|[本文画像2用英語クエリ]
-※IMAGE_QUERIESは「人物・シーン・雰囲気」を描写する英語フレーズにすること。本・テキスト・画面など文字が載る物体は避ける。例：「adult studying at desk late night」「focused woman taking notes cafe」
+IMAGE_QUERIES: [ヒーロー画像用英語クエリ]|[本文画像1用英語クエリ]|[本文画像2用英語クエリ]
+※IMAGE_QUERIESの絶対ルール：
+- 人物・場所・雰囲気・光の質感を具体的に描写する英語フレーズ（5〜9語）にすること
+- 本・教科書・ノート・画面・文字が写るものは一切含めない
+- 3枚がすべて異なるシチュエーション・構図になるよう意識する
+- ヒーロー：広がりのある場面（例：カフェの窓際、自宅リビング朝の光、オフィスのデスク）
+- 本文1：アクティブな場面（例：通勤電車、休憩室、立ち仕事の合間）
+- 本文2：感情・結果を表す場面（例：達成感、リラックス、集中）
+- 性別・年齢・場所・時間帯を毎回バラバラにすること
+- 悪い例（単調）：「adult studying at desk」「person studying」「woman at desk」
+- 良い例（多様）：「young woman smiling at cafe window morning sunlight」「tired businessman on commuter train eyes closed headphones」「middle-aged man fist pump at home office evening lamp」
 INFOGRAPHIC_PROMPT: [記事内の比較表をインフォグラフィック化するための英語プロンプト。1行で書くこと。比較表の全データ（列名・行・値）を含め、gpt-image-2が正確に描画できるよう具体的に記述する。日本語テキストはそのまま含めてよい。デザイン指示も含める：white background, modern minimal Japanese design, soft blue accent, clear readable fonts.]
 ---
 title: '記事タイトル'

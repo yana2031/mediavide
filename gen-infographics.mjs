@@ -123,39 +123,35 @@ Design: Modern minimal clean Japanese design. White background, soft blue accent
 
 Title: FP2級 学習方法・費用比較
 
-Layout: 4 columns on a white background.
+Layout: 2 rows x 2 columns grid (4 cards total) on a white background. Keep each card simple with few lines of text.
 
-Column 1 — 独学
-費用: 5,000〜15,000円（書籍代）
-学習スタイル: 自己管理・紙テキスト中心
-質問サポート: なし
+Card A (top-left) — 独学
+費用: 5,000〜15,000円
+サポート: なし
 スキマ学習: 低〜中
-向いている人: 自律型・既存知識あり
+向いている人: 自律型・知識がある人
 
-Column 2 — スタディング [light blue highlight, label コスパ◎]
+Card B (top-right) — スタディング [light blue background, badge: コスパ◎]
 費用: 約17,800円〜
-学習スタイル: スマホ動画・Web問題集
-質問サポート: あり（AIチャット等）
+サポート: あり
 スキマ学習: 高
 向いている人: 時間が細切れな人
 
-Column 3 — フォーサイト
+Card C (bottom-left) — フォーサイト
 費用: 約32,800円〜
-学習スタイル: テキスト＋動画
-質問サポート: あり
+サポート: あり
 スキマ学習: 中〜高
 向いている人: バランス重視
 
-Column 4 — ユーキャン
+Card D (bottom-right) — ユーキャン
 費用: 約64,000円〜
-学習スタイル: テキスト＋添削
-質問サポート: あり
+サポート: あり
 スキマ学習: 中
 向いている人: じっくり取り組める人
 
-Footer: ※費用・内容は変更される場合があります。各公式サイトで最新情報をご確認ください。
+Footer small text: ※費用は概算。各公式サイトでご確認ください。
 
-Design: Modern minimal clean Japanese design. White background, blue and orange accents. All Japanese text exactly as written.`,
+Design: Modern minimal clean. White background, blue accent color. Japanese text exactly as written. Large readable font. Plenty of whitespace inside each card.`,
   },
 ];
 
