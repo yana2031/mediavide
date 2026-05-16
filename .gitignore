@@ -17,6 +17,11 @@ pnpm-debug.log*
 .env
 .env.production
 
+# local oauth credentials (never commit)
+scripts/oauth-config.mjs
+analytics-data.json
+improvement-report.md
+
 # macOS-specific files
 .DS_Store
 

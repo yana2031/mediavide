@@ -8,12 +8,10 @@
  */
 import { google } from 'googleapis';
 import http from 'http';
+import { CLIENT_ID, CLIENT_SECRET } from './oauth-config.mjs';
 
-const CLIENT_ID     = process.env.GOOGLE_OAUTH_CLIENT_ID;
-const CLIENT_SECRET = process.env.GOOGLE_OAUTH_CLIENT_SECRET;
-
-if (!CLIENT_ID || !CLIENT_SECRET) {
-  console.error('❌ GOOGLE_OAUTH_CLIENT_ID と GOOGLE_OAUTH_CLIENT_SECRET を環境変数に設定してください');
+if (CLIENT_ID.includes('ここに') || CLIENT_SECRET.includes('ここに')) {
+  console.error('❌ scripts/oauth-config.mjs にクライアントID・シークレットを入力してください');
   process.exit(1);
 }
 
@@ -35,15 +33,10 @@ console.log('\n🌐 以下の URL をブラウザで開いてください:\n');
 console.log(authUrl);
 console.log('\n（自動で開かない場合は上記 URL をコピーしてブラウザに貼り付けてください）\n');
 
-// ブラウザを自動オープン
+// ブラウザを自動オープン（macOS/Linux のみ）
 import { exec } from 'child_process';
-if (process.platform === 'win32') {
-  exec(`cmd /c start "" "${authUrl}"`);
-} else if (process.platform === 'darwin') {
-  exec(`open "${authUrl}"`);
-} else {
-  exec(`xdg-open "${authUrl}"`);
-}
+if (process.platform === 'darwin') exec(`open "${authUrl}"`);
+else if (process.platform === 'linux') exec(`xdg-open "${authUrl}"`);
 
 // ローカルサーバーでコールバックを受け取る
 const server = http.createServer(async (req, res) => {
