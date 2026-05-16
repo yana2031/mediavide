@@ -24,33 +24,47 @@ const CATEGORY_KEYWORDS = {
 
 const IMAGES_PUBLIC_DIR = "public/images/articles";
 
-async function downloadUnsplashImage(query, outputPath) {
-  const key = process.env.UNSPLASH_ACCESS_KEY;
+async function generateDalleImage(query, outputPath, size = "1792x1024") {
+  const key = process.env.OPENAI_API_KEY;
   if (!key) {
-    console.warn("  ⚠ UNSPLASH_ACCESS_KEY が未設定のため画像をスキップします");
+    console.warn("  ⚠ OPENAI_API_KEY が未設定のため画像をスキップします");
     return false;
   }
+  const prompt = `A professional, clean, photo-realistic image for a Japanese online education and certification study website. Topic: ${query}. The image should look inspiring and trustworthy, suitable for a study guide article. No text overlay, no watermarks, no logos. Natural lighting, high quality.`;
   try {
-    const apiRes = await fetch(
-      `https://api.unsplash.com/photos/random?query=${encodeURIComponent(query)}&orientation=landscape&content_filter=high`,
-      { headers: { Authorization: `Client-ID ${key}` } }
-    );
+    const apiRes = await fetch("https://api.openai.com/v1/images/generations", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${key}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "dall-e-3",
+        prompt,
+        n: 1,
+        size,
+        quality: "standard",
+        response_format: "url",
+      }),
+    });
     if (!apiRes.ok) {
-      console.warn(`  ⚠ Unsplash API エラー: ${apiRes.status}`);
+      const err = await apiRes.json();
+      console.warn(`  ⚠ DALL-E API エラー: ${apiRes.status}`, err.error?.message ?? "");
       return false;
     }
     const data = await apiRes.json();
-    const imgRes = await fetch(data.urls.regular);
+    const imageUrl = data.data[0].url;
+
+    const imgRes = await fetch(imageUrl);
     if (!imgRes.ok) return false;
 
     const dir = path.dirname(outputPath);
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
     fs.writeFileSync(outputPath, Buffer.from(await imgRes.arrayBuffer()));
-    console.log(`  📷 保存: ${outputPath}`);
-    console.log(`     Photo by ${data.user.name} on Unsplash`);
+    console.log(`  🎨 生成: ${outputPath}`);
     return true;
   } catch (err) {
-    console.warn(`  ⚠ 画像取得エラー: ${err.message}`);
+    console.warn(`  ⚠ 画像生成エラー: ${err.message}`);
     return false;
   }
 }
@@ -198,14 +212,14 @@ if (!fs.existsSync(IMAGES_PUBLIC_DIR)) fs.mkdirSync(IMAGES_PUBLIC_DIR, { recursi
 const heroQuery  = imageQueries[0] ?? CATEGORY_KEYWORDS[categorySlug];
 console.log(`\n🖼  ヒーロー画像: "${heroQuery}"`);
 const heroPath   = `${IMAGES_PUBLIC_DIR}/${urlSlug}-hero.jpg`;
-const heroOk     = await downloadUnsplashImage(heroQuery, heroPath);
+const heroOk     = await generateDalleImage(heroQuery, heroPath, "1792x1024");
 const heroPublic = heroOk ? `/images/articles/${urlSlug}-hero.jpg` : "";
 
 const bodyImgOk = [];
 for (let i = 1; i < imageQueries.length; i++) {
   const q = imageQueries[i] ?? CATEGORY_KEYWORDS[categorySlug];
   console.log(`\n🖼  本文画像 ${i}: "${q}"`);
-  const ok = await downloadUnsplashImage(q, `${IMAGES_PUBLIC_DIR}/${urlSlug}-body-${i}.jpg`);
+  const ok = await generateDalleImage(q, `${IMAGES_PUBLIC_DIR}/${urlSlug}-body-${i}.jpg`, "1024x1024");
   bodyImgOk.push(ok);
 }
 
