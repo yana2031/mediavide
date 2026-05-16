@@ -2,7 +2,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import fs from "fs";
 
 const client = new Anthropic();
-const today = new Date().toISOString().split("T")[0];
+const today = new Date().toLocaleDateString('sv-SE');
 const year  = new Date().getFullYear();
 const slug  = "shakaijin-boki2-study-method";
 const categorySlug = "shakaijin-study";

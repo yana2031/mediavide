@@ -3,7 +3,7 @@ import fs from "fs";
 import path from "path";
 
 const client = new Anthropic();
-const today = new Date().toISOString().split("T")[0];
+const today = new Date().toLocaleDateString('sv-SE');
 const year  = new Date().getFullYear();
 const slug  = "shikaku-shutoku-tips";
 const categorySlug = "shakaijin-study";
