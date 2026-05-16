@@ -1,14 +1,13 @@
 import Anthropic from "@anthropic-ai/sdk";
 import fs from "fs";
-import path from "path";
 
 const client = new Anthropic();
 const today = new Date().toISOString().split("T")[0];
 const year  = new Date().getFullYear();
-const slug  = "shikaku-shutoku-tips";
+const slug  = "shakaijin-boki2-study-method";
 const categorySlug = "shakaijin-study";
 
-console.log("📝 記事を再生成中...");
+console.log("📝 簿記2級記事を再生成中...");
 
 const response = await client.messages.create({
   model: "claude-sonnet-4-6",
@@ -23,7 +22,7 @@ const response = await client.messages.create({
 20〜40代の社会人。残業が多く、家族もいて、本当に時間がない。でも転職・昇進のために何とかしたい。
 「本当に自分にできるのか」という不安が強い。成功談よりも「実際のところどうなの？」という本音を求めている。
 
-【テーマ】働きながら資格取得を成功させる方法・勉強法・継続のコツ
+【テーマ】社会人が働きながら簿記2級に合格するための勉強法・スケジュール・独学vs通信講座
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━
 【文体・トーンの絶対ルール】
@@ -86,11 +85,6 @@ category: '${categorySlug}'
 });
 
 const content = response.content[0].text.trim();
-
 const dir = `src/content/blog/${categorySlug}`;
-if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-
-const filename = `${dir}/${slug}.md`;
-fs.writeFileSync(filename, content);
-
-console.log(`✅ 再生成完了: ${filename}`);
+fs.writeFileSync(`${dir}/${slug}.md`, content);
+console.log(`✅ 再生成完了: ${dir}/${slug}.md`);
