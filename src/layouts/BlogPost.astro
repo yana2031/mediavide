@@ -292,6 +292,55 @@ const breadcrumbJsonLd = {
 	</body>
 </html>
 
+<script>
+// スクロールフェードイン + マーカーアニメーション
+(function () {
+  const FADE_TARGETS = '.prose p, .prose h2, .prose h3, .prose blockquote, .prose table, .prose img, .prose ul, .prose ol';
+
+  const els = Array.from(document.querySelectorAll(FADE_TARGETS));
+  if (!els.length) return;
+
+  // 初期状態を非表示に
+  els.forEach(el => el.classList.add('fade-el'));
+
+  function revealEl(el: Element, delay = 0) {
+    (el as HTMLElement).style.transitionDelay = delay + 'ms';
+    el.classList.add('is-visible');
+
+    // マーカー対象は p と li 内の strong のみ（blockquote 内は除外）
+    if (el.tagName === 'P' || el.tagName === 'LI' || el.tagName === 'UL' || el.tagName === 'OL') {
+      el.querySelectorAll<HTMLElement>('p strong, li strong').forEach((s, i) => {
+        setTimeout(() => s.classList.add('mark-in'), delay + 280 + i * 140);
+      });
+    }
+  }
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          revealEl(entry.target);
+          observer.unobserve(entry.target);
+        }
+      });
+    },
+    { threshold: 0.08, rootMargin: '0px 0px -36px 0px' }
+  );
+
+  // 初期表示領域内の要素はページロード直後にスタガー表示
+  let batch = 0;
+  els.forEach(el => {
+    const rect = el.getBoundingClientRect();
+    if (rect.top < window.innerHeight + 40) {
+      revealEl(el, batch * 70);
+      batch++;
+    } else {
+      observer.observe(el);
+    }
+  });
+})();
+</script>
+
 <style>
 	.article-layout {
 		max-width: var(--max-width);
@@ -539,6 +588,34 @@ const breadcrumbJsonLd = {
 	/* FAQ section（## よくある質問 の中の h3 Q: 形式） */
 	.prose :global(h3):has(+ p) {
 		margin-top: 1.5em;
+	}
+
+	/* ── スクロールフェードイン ── */
+	.prose :global(.fade-el) {
+		opacity: 0;
+		transform: translateY(26px);
+		transition:
+			opacity 0.65s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+			transform 0.65s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+	}
+	.prose :global(.fade-el.is-visible) {
+		opacity: 1;
+		transform: translateY(0);
+	}
+
+	/* ── アニメーションマーカー ── */
+	.prose :global(p strong),
+	.prose :global(li strong) {
+		background-image: linear-gradient(transparent 58%, rgba(255, 213, 79, 0.6) 58%);
+		background-repeat: no-repeat;
+		background-size: 0% 100%;
+		background-position: left center;
+		padding-bottom: 0.06em;
+		transition: background-size 0.55s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+	}
+	.prose :global(p strong.mark-in),
+	.prose :global(li strong.mark-in) {
+		background-size: 100% 100%;
 	}
 
 	/* Article Footer */
