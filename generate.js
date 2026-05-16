@@ -71,6 +71,51 @@ async function generateAiImage(query, outputPath, size = "1536x1024") {
   }
 }
 
+async function generateInfographicImage(prompt, outputPath) {
+  if (fs.existsSync(outputPath)) {
+    console.log(`  ✅ スキップ（既存）: ${outputPath}`);
+    return true;
+  }
+  const key = process.env.OPENAI_API_KEY;
+  if (!key) return false;
+  try {
+    const apiRes = await fetch("https://api.openai.com/v1/images/generations", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ model: "gpt-image-2", prompt, n: 1, size: "1536x1024", quality: "high" }),
+    });
+    if (!apiRes.ok) {
+      const err = await apiRes.json();
+      console.warn(`  ⚠ インフォグラフィック API エラー: ${apiRes.status}`, err.error?.message ?? "");
+      return false;
+    }
+    const data = await apiRes.json();
+    const dir = path.dirname(outputPath);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(outputPath, Buffer.from(data.data[0].b64_json, "base64"));
+    console.log(`  📊 生成: ${outputPath}`);
+    return true;
+  } catch (err) {
+    console.warn(`  ⚠ インフォグラフィック生成エラー: ${err.message}`);
+    return false;
+  }
+}
+
+function insertInfographic(content, slug) {
+  const lines = content.split("\n");
+  let lastTableLine = -1;
+  for (let i = 0; i < lines.length; i++) {
+    if (lines[i].startsWith("|")) lastTableLine = i;
+  }
+  if (lastTableLine === -1) return content;
+  let insertAt = lastTableLine + 1;
+  while (insertAt < lines.length && lines[insertAt].trim() === "") insertAt++;
+  if (insertAt < lines.length && lines[insertAt].startsWith("※")) insertAt++;
+  const before = lines.slice(0, insertAt);
+  const after = lines.slice(insertAt);
+  return [...before, "", `![](/images/articles/${slug}-info-1.jpg)`, "", ...after].join("\n");
+}
+
 function insertBodyImages(content, slug, hasImages) {
   if (!hasImages) return content;
   const lines = content.split("\n");
@@ -175,6 +220,7 @@ CATEGORY_SLUG: [選んだカテゴリーのslug]
 URL_SLUG: [英語slug、小文字・ハイフン区切り・3〜5単語]
 IMAGE_QUERIES: [ヒーロー画像用英語クエリ3〜5語]|[本文画像1用英語クエリ]|[本文画像2用英語クエリ]
 ※IMAGE_QUERIESは「人物・シーン・雰囲気」を描写する英語フレーズにすること。本・テキスト・画面など文字が載る物体は避ける。例：「adult studying at desk late night」「focused woman taking notes cafe」
+INFOGRAPHIC_PROMPT: [記事内の比較表をインフォグラフィック化するための英語プロンプト。1行で書くこと。比較表の全データ（列名・行・値）を含め、gpt-image-2が正確に描画できるよう具体的に記述する。日本語テキストはそのまま含めてよい。デザイン指示も含める：white background, modern minimal Japanese design, soft blue accent, clear readable fonts.]
 ---
 title: '記事タイトル'
 description: '説明文（120文字以内）'
@@ -196,9 +242,10 @@ category: '[CATEGORY_SLUGと同じ値]'
 const text = response.content[0].text.trim();
 const lines = text.split("\n");
 
-const categorySlug = lines[0].replace("CATEGORY_SLUG:", "").trim();
-const urlSlug      = lines[1].replace("URL_SLUG:", "").trim();
-const imageQueries = lines[2].replace("IMAGE_QUERIES:", "").trim().split("|").map(q => q.trim());
+const categorySlug      = lines[0].replace("CATEGORY_SLUG:", "").trim();
+const urlSlug           = lines[1].replace("URL_SLUG:", "").trim();
+const imageQueries      = lines[2].replace("IMAGE_QUERIES:", "").trim().split("|").map(q => q.trim());
+const infographicPrompt = lines[3].replace("INFOGRAPHIC_PROMPT:", "").trim();
 
 if (!CATEGORIES[categorySlug]) {
   throw new Error(`Unknown category: "${categorySlug}". Valid: ${Object.keys(CATEGORIES).join(", ")}`);
@@ -207,7 +254,7 @@ if (!urlSlug || !/^[a-z0-9-]+$/.test(urlSlug)) {
   throw new Error(`Invalid URL slug: "${urlSlug}"`);
 }
 
-const rawContent = lines.slice(3).join("\n").trim();
+const rawContent = lines.slice(4).join("\n").trim();
 
 // ── Download images ───────────────────────────────────────────────────────────
 if (!fs.existsSync(IMAGES_PUBLIC_DIR)) fs.mkdirSync(IMAGES_PUBLIC_DIR, { recursive: true });
@@ -226,9 +273,15 @@ for (let i = 1; i < imageQueries.length; i++) {
   bodyImgOk.push(ok);
 }
 
+// ── Generate infographic ──────────────────────────────────────────────────────
+console.log(`\n📊 インフォグラフィック生成中...`);
+const infoPath = `${IMAGES_PUBLIC_DIR}/${urlSlug}-info-1.jpg`;
+const infoOk = await generateInfographicImage(infographicPrompt, infoPath);
+
 // ── Build final content ───────────────────────────────────────────────────────
 let finalContent = rawContent.replace("'HERO_IMAGE'", heroPublic ? `'${heroPublic}'` : "");
 finalContent = insertBodyImages(finalContent, urlSlug, bodyImgOk.some(Boolean));
+if (infoOk) finalContent = insertInfographic(finalContent, urlSlug);
 
 // ── Write file ────────────────────────────────────────────────────────────────
 const dir = `src/content/blog/${categorySlug}`;
