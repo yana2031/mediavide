@@ -36,22 +36,22 @@ jobs:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: node scripts/improve-content.mjs
 
-      - name: Check for changes
-        id: changes
-        run: |
-          git diff --quiet && echo "changed=false" >> $GITHUB_OUTPUT || echo "changed=true" >> $GITHUB_OUTPUT
-
       - name: Create Pull Request
-        if: steps.changes.outputs.changed == 'true'
-        uses: peter-evans/create-pull-request@v6
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          branch: auto/content-improvement-${{ github.run_number }}
-          title: '🤖 コンテンツ自動改善 (${{ github.run_number }})'
-          body-path: improvement-report.md
-          commit-message: 'Auto-improve content based on GSC/GA4 analysis'
-          labels: auto-improvement
-
-      - name: No changes
-        if: steps.changes.outputs.changed == 'false'
-        run: echo "✅ 改善が必要な記事はありませんでした"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if git diff --quiet && git diff --staged --quiet; then
+            echo "✅ 改善が必要な記事はありませんでした"
+            exit 0
+          fi
+          BRANCH="auto/content-improvement-${{ github.run_number }}"
+          git config user.email "action@github.com"
+          git config user.name "GitHub Actions"
+          git checkout -b "$BRANCH"
+          git add .
+          git commit -m "Auto-improve content based on GSC/GA4 analysis"
+          git push origin "$BRANCH"
+          gh pr create \
+            --title "🤖 コンテンツ自動改善 (${{ github.run_number }})" \
+            --body-file improvement-report.md \
+            --base main
