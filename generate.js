@@ -24,7 +24,7 @@ const CATEGORY_KEYWORDS = {
 
 const IMAGES_PUBLIC_DIR = "public/images/articles";
 
-async function generateDalleImage(query, outputPath, size = "1792x1024") {
+async function generateAiImage(query, outputPath, size = "1536x1024") {
   const key = process.env.OPENAI_API_KEY;
   if (!key) {
     console.warn("  ⚠ OPENAI_API_KEY が未設定のため画像をスキップします");
@@ -39,28 +39,26 @@ async function generateDalleImage(query, outputPath, size = "1792x1024") {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "dall-e-3",
+        model: "gpt-image-1",
         prompt,
         n: 1,
         size,
-        quality: "standard",
-        response_format: "url",
+        quality: "medium",
       }),
     });
     if (!apiRes.ok) {
       const err = await apiRes.json();
-      console.warn(`  ⚠ DALL-E API エラー: ${apiRes.status}`, err.error?.message ?? "");
+      console.warn(`  ⚠ 画像生成 API エラー: ${apiRes.status}`, err.error?.message ?? "");
       return false;
     }
     const data = await apiRes.json();
-    const imageUrl = data.data[0].url;
-
-    const imgRes = await fetch(imageUrl);
-    if (!imgRes.ok) return false;
+    // gpt-image-1 は b64_json で返る
+    const b64 = data.data[0].b64_json;
+    const buffer = Buffer.from(b64, "base64");
 
     const dir = path.dirname(outputPath);
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    fs.writeFileSync(outputPath, Buffer.from(await imgRes.arrayBuffer()));
+    fs.writeFileSync(outputPath, buffer);
     console.log(`  🎨 生成: ${outputPath}`);
     return true;
   } catch (err) {
@@ -212,14 +210,14 @@ if (!fs.existsSync(IMAGES_PUBLIC_DIR)) fs.mkdirSync(IMAGES_PUBLIC_DIR, { recursi
 const heroQuery  = imageQueries[0] ?? CATEGORY_KEYWORDS[categorySlug];
 console.log(`\n🖼  ヒーロー画像: "${heroQuery}"`);
 const heroPath   = `${IMAGES_PUBLIC_DIR}/${urlSlug}-hero.jpg`;
-const heroOk     = await generateDalleImage(heroQuery, heroPath, "1792x1024");
+const heroOk     = await generateAiImage(heroQuery, heroPath, "1792x1024");
 const heroPublic = heroOk ? `/images/articles/${urlSlug}-hero.jpg` : "";
 
 const bodyImgOk = [];
 for (let i = 1; i < imageQueries.length; i++) {
   const q = imageQueries[i] ?? CATEGORY_KEYWORDS[categorySlug];
   console.log(`\n🖼  本文画像 ${i}: "${q}"`);
-  const ok = await generateDalleImage(q, `${IMAGES_PUBLIC_DIR}/${urlSlug}-body-${i}.jpg`, "1024x1024");
+  const ok = await generateAiImage(q, `${IMAGES_PUBLIC_DIR}/${urlSlug}-body-${i}.jpg`, "1024x1024");
   bodyImgOk.push(ok);
 }
 
