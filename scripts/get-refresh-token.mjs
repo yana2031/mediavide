@@ -35,10 +35,15 @@ console.log('\n🌐 以下の URL をブラウザで開いてください:\n');
 console.log(authUrl);
 console.log('\n（自動で開かない場合は上記 URL をコピーしてブラウザに貼り付けてください）\n');
 
-// macOS / Windows で自動オープンを試みる
-const opener = process.platform === 'win32' ? 'start' : 'open';
+// ブラウザを自動オープン
 import { exec } from 'child_process';
-exec(`${opener} "${authUrl}"`);
+if (process.platform === 'win32') {
+  exec(`cmd /c start "" "${authUrl}"`);
+} else if (process.platform === 'darwin') {
+  exec(`open "${authUrl}"`);
+} else {
+  exec(`xdg-open "${authUrl}"`);
+}
 
 // ローカルサーバーでコールバックを受け取る
 const server = http.createServer(async (req, res) => {
