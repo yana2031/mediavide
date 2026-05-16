@@ -2,29 +2,31 @@
  * GSC + GA4 データを取得して analytics-data.json に保存
  *
  * 必要な環境変数:
- *   GOOGLE_SERVICE_ACCOUNT_JSON  - サービスアカウントの JSON キー（文字列）
- *   GSC_SITE_URL                 - 例: https://shikaku-online.com/
- *   GA4_PROPERTY_ID              - 例: 123456789
+ *   GOOGLE_OAUTH_CLIENT_ID      - OAuth 2.0 クライアント ID
+ *   GOOGLE_OAUTH_CLIENT_SECRET  - OAuth 2.0 クライアントシークレット
+ *   GOOGLE_OAUTH_REFRESH_TOKEN  - リフレッシュトークン（get-refresh-token.mjs で取得）
+ *   GSC_SITE_URL                - 例: https://shikaku-online.com/
+ *   GA4_PROPERTY_ID             - 例: 123456789
  */
 import { google } from 'googleapis';
 import fs from 'fs';
 
-const SA_JSON   = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
-const SITE_URL  = process.env.GSC_SITE_URL;
-const GA4_ID    = process.env.GA4_PROPERTY_ID;
+const CLIENT_ID     = process.env.GOOGLE_OAUTH_CLIENT_ID;
+const CLIENT_SECRET = process.env.GOOGLE_OAUTH_CLIENT_SECRET;
+const REFRESH_TOKEN = process.env.GOOGLE_OAUTH_REFRESH_TOKEN;
+const SITE_URL      = process.env.GSC_SITE_URL;
+const GA4_ID        = process.env.GA4_PROPERTY_ID;
 
-if (!SA_JSON || !SITE_URL || !GA4_ID) {
-  console.error('❌ 環境変数 GOOGLE_SERVICE_ACCOUNT_JSON / GSC_SITE_URL / GA4_PROPERTY_ID が未設定');
+if (!CLIENT_ID || !CLIENT_SECRET || !REFRESH_TOKEN || !SITE_URL || !GA4_ID) {
+  console.error('❌ 必要な環境変数が未設定です');
+  console.error('   GOOGLE_OAUTH_CLIENT_ID / GOOGLE_OAUTH_CLIENT_SECRET / GOOGLE_OAUTH_REFRESH_TOKEN');
+  console.error('   GSC_SITE_URL / GA4_PROPERTY_ID');
   process.exit(1);
 }
 
-const auth = new google.auth.GoogleAuth({
-  credentials: JSON.parse(SA_JSON),
-  scopes: [
-    'https://www.googleapis.com/auth/webmasters.readonly',
-    'https://www.googleapis.com/auth/analytics.readonly',
-  ],
-});
+const oauth2 = new google.auth.OAuth2(CLIENT_ID, CLIENT_SECRET);
+oauth2.setCredentials({ refresh_token: REFRESH_TOKEN });
+const auth = oauth2;
 
 // ── 期間 ──────────────────────────────────────────────────────────────────────
 const END   = new Date();
