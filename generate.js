@@ -30,7 +30,7 @@ async function generateAiImage(query, outputPath, size = "1536x1024") {
     console.warn("  ⚠ OPENAI_API_KEY が未設定のため画像をスキップします");
     return false;
   }
-  const prompt = `A professional, clean, photo-realistic image for a Japanese online education and certification study website. Topic: ${query}. The image should look inspiring and trustworthy, suitable for a study guide article. No text overlay, no watermarks, no logos. Natural lighting, high quality.`;
+  const prompt = `A professional, photo-realistic image for a Japanese online education website. Scene: ${query}. Focus on people and workspace environments — avoid showing books, screens, or any objects with visible text. Absolutely no text, letters, characters, or writing of any kind anywhere in the image. No watermarks, no logos. Warm natural lighting, clean and inspiring atmosphere.`;
   try {
     const apiRes = await fetch("https://api.openai.com/v1/images/generations", {
       method: "POST",
@@ -170,6 +170,7 @@ ${categoryList}
 CATEGORY_SLUG: [選んだカテゴリーのslug]
 URL_SLUG: [英語slug、小文字・ハイフン区切り・3〜5単語]
 IMAGE_QUERIES: [ヒーロー画像用英語クエリ3〜5語]|[本文画像1用英語クエリ]|[本文画像2用英語クエリ]
+※IMAGE_QUERIESは「人物・シーン・雰囲気」を描写する英語フレーズにすること。本・テキスト・画面など文字が載る物体は避ける。例：「adult studying at desk late night」「focused woman taking notes cafe」
 ---
 title: '記事タイトル'
 description: '説明文（120文字以内）'
