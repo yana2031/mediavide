@@ -1,5 +1,6 @@
 ---
 import type { CollectionEntry } from 'astro:content';
+import { getCollection } from 'astro:content';
 import BaseHead from '../components/BaseHead.astro';
 import Footer from '../components/Footer.astro';
 import FormattedDate from '../components/FormattedDate.astro';
@@ -30,6 +31,29 @@ const {
 
 const categoryLabel = category ? CATEGORIES[category] : null;
 const tocHeadings = headings.filter(h => h.depth === 2 || h.depth === 3);
+
+// Sidebar: 新着・人気記事（現在の記事を除く）
+const currentPath = Astro.url.pathname;
+const allPosts = await getCollection('blog');
+
+const recentPosts = allPosts
+	.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
+	.filter(p => {
+		const id = p.id.replace(/\\/g, '/');
+		const slug = id.split('/').pop();
+		return `/${p.data.category}/${slug}/` !== currentPath;
+	})
+	.slice(0, 5);
+
+// 人気記事: pubDate昇順（記事が増えたら analytics に差し替え可）
+const popularPosts = allPosts
+	.sort((a, b) => a.data.pubDate.valueOf() - b.data.pubDate.valueOf())
+	.filter(p => {
+		const id = p.id.replace(/\\/g, '/');
+		const slug = id.split('/').pop();
+		return `/${p.data.category}/${slug}/` !== currentPath;
+	})
+	.slice(0, 5);
 
 // Breadcrumb JSON-LD
 const siteUrl = Astro.site?.toString().replace(/\/$/, '') ?? '';
@@ -185,9 +209,62 @@ const breadcrumbJsonLd = {
 					</div>
 				)}
 
+				<!-- 新着記事 Widget -->
+				{recentPosts.length > 0 && (
+					<div class="sidebar-widget">
+						<h3 class="widget-title">🆕 新着記事</h3>
+						<ul class="article-list">
+							{recentPosts.map(p => {
+								const sid = p.id.replace(/\\/g, '/').split('/').pop();
+								return (
+									<li class="article-list-item">
+										<a href={`/${p.data.category}/${sid}/`} class="article-list-link">
+											{p.data.heroImage
+												? <img src={p.data.heroImage} alt={p.data.title} class="article-list-thumb" loading="lazy" />
+												: <div class="article-list-thumb article-list-thumb--placeholder" />
+											}
+											<div class="article-list-body">
+												<span class="article-list-title">{p.data.title}</span>
+												<span class="article-list-date">
+													<FormattedDate date={p.data.pubDate} />
+												</span>
+											</div>
+										</a>
+									</li>
+								);
+							})}
+						</ul>
+					</div>
+				)}
+
+				<!-- 人気記事 Widget -->
+				{popularPosts.length > 0 && (
+					<div class="sidebar-widget">
+						<h3 class="widget-title">🔥 人気記事</h3>
+						<ul class="article-list">
+							{popularPosts.map((p, i) => {
+								const sid = p.id.replace(/\\/g, '/').split('/').pop();
+								return (
+									<li class="article-list-item">
+										<a href={`/${p.data.category}/${sid}/`} class="article-list-link">
+											<span class="article-list-rank">{i + 1}</span>
+											<div class="article-list-body">
+												<span class="article-list-title">{p.data.title}</span>
+												<span class="article-list-date">
+													<FormattedDate date={p.data.pubDate} />
+												</span>
+											</div>
+										</a>
+									</li>
+								);
+							})}
+						</ul>
+					</div>
+				)}
+
 				<!-- Category Widget -->
 				<div class="sidebar-widget">
-					<h3 class="widget-title">📂 カテゴリー</h2>
+					<h3 class="widget-title">📂 カテゴリー</h3>
 					<ul class="widget-list">
 						{Object.entries(CATEGORIES).map(([slug, label]) => (
 							<li>
@@ -205,7 +282,7 @@ const breadcrumbJsonLd = {
 
 				<!-- About Widget -->
 				<div class="sidebar-widget">
-					<h3 class="widget-title">📌 サイトについて</h2>
+					<h3 class="widget-title">📌 サイトについて</h3>
 					<p class="widget-text">オンライン資格講座の比較・レビュー情報を発信。社会人の資格取得を応援するメディアです。</p>
 					<a href="/about/" class="widget-link">詳しく見る →</a>
 				</div>
@@ -529,6 +606,56 @@ const breadcrumbJsonLd = {
 	.widget-list a.active { font-weight: 700; }
 	.widget-text { font-size: 0.85rem; color: var(--color-text-muted); line-height: 1.7; margin-bottom: 0.75rem; }
 	.widget-link { font-size: 0.85rem; font-weight: 600; color: var(--color-primary); }
+
+	/* Article list (新着・人気) */
+	.article-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.75rem; }
+	.article-list-item { border-bottom: 1px solid var(--color-border); padding-bottom: 0.75rem; }
+	.article-list-item:last-child { border-bottom: none; padding-bottom: 0; }
+	.article-list-link {
+		display: flex;
+		gap: 0.6rem;
+		align-items: flex-start;
+		text-decoration: none;
+		color: inherit;
+	}
+	.article-list-link:hover .article-list-title { color: var(--color-primary); }
+	.article-list-thumb {
+		width: 60px;
+		height: 45px;
+		object-fit: cover;
+		border-radius: var(--radius-sm);
+		flex-shrink: 0;
+	}
+	.article-list-thumb--placeholder {
+		background: var(--color-primary-light);
+	}
+	.article-list-rank {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 24px;
+		height: 24px;
+		border-radius: 50%;
+		background: var(--color-primary);
+		color: #fff;
+		font-size: 0.72rem;
+		font-weight: 700;
+		flex-shrink: 0;
+		margin-top: 2px;
+	}
+	.article-list-body { display: flex; flex-direction: column; gap: 0.2rem; min-width: 0; }
+	.article-list-title {
+		font-size: 0.8rem;
+		font-weight: 600;
+		line-height: 1.4;
+		color: var(--color-text);
+		display: -webkit-box;
+		-webkit-line-clamp: 3;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+		transition: color 0.12s;
+	}
+	.article-list-date { font-size: 0.72rem; color: var(--color-text-muted); }
 
 	/* Responsive */
 	@media (max-width: 860px) {
