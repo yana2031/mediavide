@@ -25,6 +25,10 @@ const CATEGORY_KEYWORDS = {
 const IMAGES_PUBLIC_DIR = "public/images/articles";
 
 async function generateAiImage(query, outputPath, size = "1536x1024") {
+  if (fs.existsSync(outputPath)) {
+    console.log(`  ✅ スキップ（既存）: ${outputPath}`);
+    return true;
+  }
   const key = process.env.OPENAI_API_KEY;
   if (!key) {
     console.warn("  ⚠ OPENAI_API_KEY が未設定のため画像をスキップします");

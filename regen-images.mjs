@@ -4,6 +4,10 @@ import path from 'path';
 const IMAGES_DIR = 'public/images/articles';
 
 async function generateAiImage(query, outputPath, size = '1024x1024') {
+  if (fs.existsSync(outputPath)) {
+    console.log(`  ✅ スキップ（既存）: ${outputPath}`);
+    return true;
+  }
   const key = process.env.OPENAI_API_KEY;
   const prompt = `A professional, photo-realistic image for a Japanese online education website. Scene: ${query}. Focus on people and workspace environments — avoid showing books, screens, or any objects with visible text. Absolutely no text, letters, characters, or writing of any kind anywhere in the image. No watermarks, no logos. Warm natural lighting, clean and inspiring atmosphere.`;
 
