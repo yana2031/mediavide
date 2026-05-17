@@ -36,12 +36,13 @@ jobs:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: node scripts/improve-content.mjs
 
-      - name: Create Pull Request
+      - name: Push improvement branch
         env:
-          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           if git diff --quiet && git diff --staged --quiet; then
             echo "✅ 改善が必要な記事はありませんでした"
+            echo "### ✅ 改善対象なし" >> $GITHUB_STEP_SUMMARY
             exit 0
           fi
           BRANCH="auto/content-improvement-${{ github.run_number }}"
@@ -51,7 +52,14 @@ jobs:
           git add .
           git commit -m "Auto-improve content based on GSC/GA4 analysis"
           git push origin "$BRANCH"
-          gh pr create \
-            --title "🤖 コンテンツ自動改善 (${{ github.run_number }})" \
-            --body-file improvement-report.md \
-            --base main
+          REPORT=$(cat improvement-report.md)
+          PR_URL=$(gh pr create \
+            --base main \
+            --head "$BRANCH" \
+            --title "🤖 コンテンツ自動改善 (run #${{ github.run_number }})" \
+            --body "$REPORT")
+          echo "### 🤖 PRを作成しました" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**👉 $PR_URL**" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          cat improvement-report.md >> $GITHUB_STEP_SUMMARY
